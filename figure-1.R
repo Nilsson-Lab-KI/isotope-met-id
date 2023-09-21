@@ -32,7 +32,21 @@ n_experients <- length(hmec_mi_data$experiments)
 #  Fig 1a
 #
 
-# TODO
+exp_index <- match("D-Glucose", hmec_mi_data$experiments)
+
+# peak 688 ATP-H
+{
+    peak_index <- get_peak_index(hmec_mi_data, "688")
+    g6p_mids <- get_mids(hmec_mi_data, peak_index, exp_index)
+    plot_mid_barchart(c13correct_cols(g6p_mids))
+}
+
+# peak 836 ADP-H
+{
+    peak_index <- get_peak_index(hmec_mi_data, "836")
+    g6p_mids <- get_mids(hmec_mi_data, peak_index, exp_index)
+    plot_mid_barchart(c13correct_cols(g6p_mids))
+}
 
 
 #
