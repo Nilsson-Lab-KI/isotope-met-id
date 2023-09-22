@@ -2,32 +2,58 @@
 #  Code to reproduce plots in Figure 1
 #
 
+library(dplyr)
+
 library(remn)
 
-# Read peak area data from the HMEC isotope tracing experiment
+# File names
 # TODO: we need to decide where to permanently store the data set
 
-hmec_path <- file.path(
+data_path <- file.path(
     "C:", "Users", "rolnil", "OneDrive - KI.SE", "Lab common", "projects",
-    "reverse-engineering-deniz", "data-for-publication", "hmec-peak-areas.tsv"
+    "reverse-engineering-deniz", "data-for-publication"
 )
+hmec_path <- file.path(data_path, "hmec-peak-areas.tsv")
 stopifnot(file.exists(hmec_path))
+qc_list_path <- file.path(data_path, "peak-qc-list.tsv")
+stopifnot(file.exists(qc_list_path))
 
+# Read peak area data from the HMEC isotope tracing experiment
 hmec_peak_areas <- read.table(
     hmec_path,
     sep = "\t",
     header = TRUE,
     check.names = FALSE
 )
-length(hmec_peak_areas)
 
 # Create MIData object
 hmec_mi_data <- MIData(hmec_peak_areas, exp_columns = 3:length(hmec_peak_areas))
 n_peaks <- length(hmec_mi_data$peak_ids)
 n_experients <- length(hmec_mi_data$experiments)
 
-# Remove false isotopomers
+# TODO: Remove false isotopomers
+# this should probably be a separate a processing script 
+# manual QC will of course have to be just a list of peak IDs
 #hmec_mi_data_cens <- censor_false_mi(hmec_mi_data, min_experiments =  n_experients / 2)
+
+# Subset to final QC'ed peak list
+peak_qc_list <- read.table(
+    qc_list_path,
+    sep = "\t",
+    header = TRUE
+)
+
+# subset the MIData object
+{
+    qc_peak_ids <- peak_qc_list %>% filter(qc == 1) %>% select(peak_id)
+    hmec_qc_mi_data <- midata_subset(
+        hmec_mi_data,
+        match(
+            qc_peak_ids[, 1],
+            hmec_mi_data$peak_ids,
+        )
+    )
+}
 
 #
 #  Fig 1a
