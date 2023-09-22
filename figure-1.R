@@ -53,6 +53,7 @@ peak_qc_list <- read.table(
             hmec_mi_data$peak_ids,
         )
     )
+    n_qc_peaks <- length(hmec_qc_mi_data$peak_ids)
 }
 
 #
@@ -116,26 +117,29 @@ exp_index <- match("D-Glucose", hmec_mi_data$experiments)
 #
 
 # calculate all distances vs. UDP-glucose
+# TODO: this could be a function in the package
 {
-    udpglc_index <- get_peak_index(hmec_mi_data, "597")
-    dist <- rep(0.0, n_peaks)
-    middle_index <- rep(0, n_peaks)
-    for(i in 1:n_peaks) {
-        assign_list[dist[i], middle_index[i]] <- conv_reduce(
-            hmec_mi_data, i, udpglc_index, exp_index,
+    udpglc_index <- get_peak_index(hmec_qc_mi_data, "597")
+    dist <- rep(0.0, n_qc_peaks)
+    convolutant_index <- rep(0, n_qc_peaks)
+    for(i in 1:n_qc_peaks) {
+        assign_list[dist[i], convolutant_index[i]] <- conv_reduce(
+            hmec_qc_mi_data, i, udpglc_index, exp_index,
             f = euclidean_dist, g = which.min
         )
     }
 }
-hist(dist, 50)        # full distribution
+# full distribution
+hist(dist, breaks = 30)
+plot(sort(dist), ylim = c(max(dist, na.rm = TRUE), 0))
 
-plot(sort(dist)[1:20])  # top 20
-
-neighbors <- order(dist)[1:10]
-# peak IDs for top 10
-hmec_mi_data$peak_ids[neighbors]
-hmec_mi_data$peak_n_atoms[neighbors]
+# top 20 plot
+top_20_index <- order(dist)[(1:20)+1]
+plot(dist[top_20_index], ylim = c(dist[last(top_20_index)], 0))
+# corresponding peak IDs
+hmec_qc_mi_data$peak_ids[top_20_index]
+hmec_qc_mi_data$peak_n_atoms[top_20_index]
 # middle metabolite IDs for top 10
-hmec_mi_data$peak_ids[middle_index[neighbors]]
+hmec_qc_mi_data$peak_ids[convolutant_index[top_20_index]]
     
     
