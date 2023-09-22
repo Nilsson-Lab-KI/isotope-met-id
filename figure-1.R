@@ -23,6 +23,7 @@ length(hmec_peak_areas)
 
 # Create MIData object
 hmec_mi_data <- MIData(hmec_peak_areas, exp_columns = 3:length(hmec_peak_areas))
+n_peaks <- length(hmec_mi_data$peak_ids)
 n_experients <- length(hmec_mi_data$experiments)
 
 # Remove false isotopomers
@@ -84,3 +85,31 @@ exp_index <- match("D-Glucose", hmec_mi_data$experiments)
     plot_mid_barchart(c13correct_cols(udpglc_mids))
 }
 
+#
+# Fig 1c
+#
+
+# calculate all distances vs. UDP-glucose
+{
+    udpglc_index <- get_peak_index(hmec_mi_data, "597")
+    dist <- rep(0.0, n_peaks)
+    middle_index <- rep(0, n_peaks)
+    for(i in 1:n_peaks) {
+        assign_list[dist[i], middle_index[i]] <- conv_reduce(
+            hmec_mi_data, i, udpglc_index, exp_index,
+            f = euclidean_dist, g = which.min
+        )
+    }
+}
+hist(dist, 50)        # full distribution
+
+plot(sort(dist)[1:20])  # top 20
+
+neighbors <- order(dist)[1:10]
+# peak IDs for top 10
+hmec_mi_data$peak_ids[neighbors]
+hmec_mi_data$peak_n_atoms[neighbors]
+# middle metabolite IDs for top 10
+hmec_mi_data$peak_ids[middle_index[neighbors]]
+    
+    
