@@ -6,12 +6,11 @@
 
 library(dplyr)
 
-# some common paths
-project_path <-  file.path(
-    "C:", "Users", "rolnil", "OneDrive - KI.SE", "Lab common", "projects",
-    "reverse-engineering-deniz"
-)
-data_path <- file.path(project_path, "data-for-publication")
+# data folder common paths
+
+input_data_path <- "00_input_data"
+preprocessed_data_path <- "01_preprocessed_data"
+mi_data_path <- "02_mi_data"
 
 # constants
 proton_mass <- 1.007276466621
@@ -24,7 +23,7 @@ read_hmec_peak_areas <- function()
 {
     return(
         read.table(
-            file.path(data_path, "qc-peak-areas.tsv"),
+            file.path(preprocessed_data_path, "qc-peak-areas.tsv"),
             sep = "\t", header = TRUE, comment.char = "", quote = ""
         )
     )
@@ -35,7 +34,7 @@ read_hmec_peak_list <- function()
 {
     return(
         read.table(
-            file.path(data_path, "qc-peak-list.tsv"),
+            file.path(preprocessed_data_path, "qc-peak-list.tsv"),
             sep = "\t", header = TRUE, comment.char = "", quote = ""
         ) %>%
         mutate(mz = mass + proton_mass*ion_mode)
