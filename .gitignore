@@ -4,4 +4,5 @@
 .Ruserdata
 *.Rproj
 
-00_preprocessed_data/
+01_preprocessed_data/*
+02_mi_data/*
