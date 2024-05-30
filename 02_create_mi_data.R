@@ -1,5 +1,5 @@
 #
-#  Create MI data object and remove false MIs
+#  Create MI data object
 #
 
 library(remn)
@@ -24,12 +24,6 @@ hmec_mi_data <- MIData(
 
 n_peaks <- length(hmec_mi_data$peak_ids)
 n_experients <- length(hmec_mi_data$experiments)
-
-# Remove false MI
-hmec_mi_data <- censor_false_mi(
-    hmec_mi_data,
-    min_experiments = 10
-) 
 
 # Write MIData object
 saveRDS(
