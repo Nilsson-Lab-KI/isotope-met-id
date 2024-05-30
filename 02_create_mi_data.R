@@ -10,10 +10,14 @@ source("common.R")
 hmec_peak_list <- read_hmec_peak_list()
 hmec_peak_areas <- read_hmec_peak_areas()
 
+
+# drop the experiment replicate number from column names
+experiment_names <- colnames(hmec_peak_areas)[3:length(hmec_peak_areas)]
 experiment_names <- substr(
-    colnames(hmec_peak_areas)[3:length(hmec_peak_areas)],
-    1, 3
+    experiment_names,
+    1, nchar(experiment_names)-2
 )
+
 
 # Create MIData object
 hmec_mi_data <- MIData(
