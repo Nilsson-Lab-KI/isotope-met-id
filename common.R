@@ -19,7 +19,7 @@ nh4_mass <- 18.034374132
 ppm_tolerance <- 10
 
 
-# Read peak area data from the HMEC isotope tracing experiment
+# peak area data from the HMEC isotope tracing experiment
 read_hmec_peak_areas <- function()
 {
     return(
@@ -30,18 +30,18 @@ read_hmec_peak_areas <- function()
     )
 }
 
-# Read peak list from the HMEC isotope tracing experiment
+# peak list from the HMEC isotope tracing experiment
 read_hmec_peak_list <- function()
 {
     return(
         read.table(
-            file.path(preprocessed_data_path, "qc-peak-list.tsv"),
+            file.path(input_data_path, "qc-peaks-with-flags.tsv"),
             sep = "\t", header = TRUE, comment.char = "", quote = ""
-        )
+        ) %>% mutate(peak_id = as.character(peak_id))
     )
 }
 
-# Read peak list from the HMEC isotope tracing experiment
+# peak to HMDB compound annotations
 read_peak_hmdb_compound <- function()
 {
     return(
