@@ -136,11 +136,28 @@ plot(
     ylim = c(0.1, 0)
 )
 
-# corresponding peaks
-udpglc_top_neighbors <- hmec_peak_list[udpglc_top_index, ]
-udpglc_top_neighbors
+# top peaks and convolutants
+udpglc_top_neighbors <- data.frame(
+    peak_id = hmec_mi_data$peak_ids[udpglc_top_index]
+)
 
-# convolutant peaks
-top_convolutants <- hmec_peak_list[convolutant_index[udpglc_top_index], ]
+udpglc_top_convolutants <- data.frame(
+    peak_id = hmec_mi_data$peak_ids[convolutant_index[udpglc_top_index]]
+)
 
+# candidate annotations from HMDB
+peak_hmdb_compound <- read_peak_hmdb_compound()
+
+udpglc_top_neighbors %>%
+    inner_join(
+        peak_hmdb_compound,
+        by = "peak_id"
+    )
+
+udpglc_top_convolutants %>%
+    inner_join(
+        peak_hmdb_compound,
+        by = "peak_id",
+        relationship = "many-to-many"
+    )
 

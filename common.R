@@ -41,6 +41,18 @@ read_hmec_peak_list <- function()
     )
 }
 
+# Read peak list from the HMEC isotope tracing experiment
+read_peak_hmdb_compound <- function()
+{
+    return(
+        read.table(
+            file.path(input_data_path, "peak_hmdb_compound.tsv"),
+            sep = "\t", header = TRUE, comment.char = "", quote = ""
+        ) %>% mutate(peak_id = as.character(peak_id))
+    )
+}
+
+
 
 get_mid_matrix <- function(mi_data, peak_id, experiments = NULL)
 {
