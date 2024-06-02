@@ -8,6 +8,8 @@ library(remn)
 source("common.R")
 
 hmec_mi_data <- readRDS(file.path(mi_data_path, 'hmec_mi_data.rds'))
+hmec_mi_data_censored <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.rds'))
+
 n_peaks <- length(hmec_mi_data$peak_ids)
 
 #
@@ -80,11 +82,6 @@ enrichment <- data.frame(
     points(x = (1:n_peaks), y = enrichment$unlabeled, col = "blue")
 }
 
-# Censor false MIs
-hmec_mi_data_censored <- censor_false_mi(
-    hmec_mi_data,
-    min_experiments = 10
-) 
 
 enrichment_censored <- data.frame(
     glc = enrichment_vector(hmec_mi_data_censored, "glc"),
@@ -118,15 +115,10 @@ enrichment_censored <- data.frame(
     }
 }
 
-# keep only distances to smaller metabolites
-# dist <- ifelse(
-#     hmec_mi_data$peak_n_atoms <= hmec_mi_data$peak_n_atoms[udpglc_index],
-#     dist, NA)
-# sum(!is.na(dist))
-# distribution
+# histogram, clip at >0.5
+hist(pmin(udpglc_dist, 0.5), breaks = 50)
 
-hist(udpglc_dist, breaks = 50)
-
+# plot, clip at >0.5
 plot(
     sort(pmin(udpglc_dist, 0.5)),
     ylim = c(0.5, 0)
