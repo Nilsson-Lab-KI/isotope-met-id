@@ -18,6 +18,7 @@ h2o_mass <- 18.010564683
 nh4_mass <- 18.034374132
 ppm_tolerance <- 10
 
+
 # Read peak area data from the HMEC isotope tracing experiment
 read_hmec_peak_areas <- function()
 {
@@ -36,8 +37,7 @@ read_hmec_peak_list <- function()
         read.table(
             file.path(preprocessed_data_path, "qc-peak-list.tsv"),
             sep = "\t", header = TRUE, comment.char = "", quote = ""
-        ) %>%
-        mutate(mz = mass + proton_mass*ion_mode)
+        )
     )
 }
 

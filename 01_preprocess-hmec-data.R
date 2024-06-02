@@ -23,10 +23,11 @@ hmec_peak_list <- hmec_peak_list %>% mutate(peak_id = row_number())
 # subset to QC peaks only
 hmec_peak_list <- hmec_peak_list %>%
     inner_join(peak_qc_list, by = join_by(peak_id))
-# drop unused fields
+# drop unused fields and recover m/z from mass
 hmec_peak_list <- hmec_peak_list %>%
     select(peak_id, mass, path, ion_mode) %>%
-    rename(netid_annotation = path)
+    rename(netid_annotation = path) %>%
+    mutate(mz = mass + proton_mass*ion_mode)
 
 # write QC peak list (721 peaks)
 write.table(
