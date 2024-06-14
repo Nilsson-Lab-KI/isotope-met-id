@@ -13,7 +13,7 @@ hmec_mi_data_censored <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.
 n_peaks <- length(hmec_mi_data$peak_ids)
 
 #
-#  Fig 1a
+#  Figure 1a
 #
 
 # peak 1917 citrate-H
@@ -30,7 +30,7 @@ n_peaks <- length(hmec_mi_data$peak_ids)
 
 
 #
-# Fig 1b
+# Figure 1b
 #
 
 # peak 1501 glucose-6P-H
@@ -60,7 +60,7 @@ n_peaks <- length(hmec_mi_data$peak_ids)
 }
 
 #
-# Suppl Fig 1a,b 13C enrichment
+# ED Figure 1a,b
 #
 
 enrichment_vector <- function(mi_data, exp_name)
@@ -97,7 +97,7 @@ enrichment_censored <- data.frame(
 
 
 #
-# Fig 1c
+# Figure 1d
 #
 
 
@@ -123,6 +123,10 @@ plot(
     sort(pmin(udpglc_dist, 0.5)),
     ylim = c(0.5, 0)
 )
+
+#
+# Figure 1e
+#
 
 # zoom in on d < 0.1
 udpglc_top_index <- intersect(
