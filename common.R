@@ -12,6 +12,7 @@ input_data_path <- "00_input_data"
 preprocessed_data_path <- "01_preprocessed_data"
 mi_data_path <- "02_mi_data"
 mid_distance_path <- "03_mid_distance"
+gold_standard_path <- "04_gold_standard"
 
 # constants
 proton_mass <- 1.007276466621
