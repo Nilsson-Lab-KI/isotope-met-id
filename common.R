@@ -20,14 +20,22 @@ h2o_mass <- 18.010564683
 nh4_mass <- 18.034374132
 ppm_tolerance <- 10
 
+read_tsv <- function(file_path)
+{
+    return(
+        read.table(
+            file_path,
+            sep = "\t", header = TRUE, comment.char = "", quote = ""
+        )
+    ) 
+}
 
 # peak area data from the HMEC isotope tracing experiment
 read_hmec_peak_areas <- function()
 {
     return(
-        read.table(
-            file.path(preprocessed_data_path, "qc-peak-areas.tsv"),
-            sep = "\t", header = TRUE, comment.char = "", quote = ""
+        read_tsv(
+            file.path(preprocessed_data_path, "qc-peak-areas.tsv")
         )
     )
 }
@@ -36,9 +44,8 @@ read_hmec_peak_areas <- function()
 read_hmec_peak_list <- function()
 {
     return(
-        read.table(
-            file.path(input_data_path, "qc-peaks-with-flags.tsv"),
-            sep = "\t", header = TRUE, comment.char = "", quote = ""
+        read_tsv(
+            file.path(input_data_path, "qc-peaks-with-flags.tsv")
         ) %>% mutate(peak_id = as.character(peak_id))
     )
 }
@@ -47,12 +54,21 @@ read_hmec_peak_list <- function()
 read_peak_hmdb_compound <- function()
 {
     return(
-        read.table(
-            file.path(input_data_path, "peak_hmdb_compound.tsv"),
-            sep = "\t", header = TRUE, comment.char = "", quote = ""
+        read_tsv(
+            file.path(input_data_path, "peak_hmdb_compound.tsv")
         ) %>% mutate(peak_id = as.character(peak_id))
     )
 }
+
+read_metabolite_pathway <- function()
+{
+    return(
+        read_tsv(
+            file.path(input_data_path, "simulation_metabolite_pathway.tsv")
+        )
+    )
+}
+
 
 
 
