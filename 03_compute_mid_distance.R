@@ -28,6 +28,6 @@ saveRDS(
 )
 saveRDS(
     hmec_conv_index,
-    file.path(mid_distance_path, 'hmec_conv_index')
+    file.path(mid_distance_path, 'hmec_conv_index.rds')
 )
 
