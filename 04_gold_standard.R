@@ -5,24 +5,30 @@
 source("common.R")
 
 
-frac_derived <- as.matrix(
+fraction_derived <- as.matrix(
     read.table(
         file.path(input_data_path, "fraction-derived-matrix.tsv"),
         header = TRUE, sep = "\t", row.names = 1, check.names = FALSE
     )
 )
 stopifnot(
-    all(rownames(frac_derived) == colnames(frac_derived))
+    all(rownames(fraction_derived) == colnames(fraction_derived))
 )
 
 # symmetrize
-frac_derived_symm <- pmax(frac_derived, t(frac_derived))
+fraction_derived <- pmax(fraction_derived, t(fraction_derived))
 stopifnot(
-    isSymmetric.matrix(frac_derived_symm)
+    isSymmetric.matrix(fraction_derived)
 )
 
+saveRDS(
+    fraction_derived,
+    file.path(gold_standard_path, 'fraction_derived.rds')
+)
+
+
 # threshold fraction derived matrix to get a binary gold standard matrix
-gold_standard <- ifelse(frac_derived > 0.5, 1, 0)
+gold_standard <- ifelse(fraction_derived > 0.5, 1, 0)
 stopifnot(
     all(!is.na(gold_standard))
 )
