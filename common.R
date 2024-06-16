@@ -5,6 +5,8 @@
 #
 
 library(dplyr)
+library(umap)
+
 
 # data folder common paths
 
@@ -69,7 +71,14 @@ read_metabolite_pathway <- function()
     )
 }
 
-
+read_plotly_tooltips <- function()
+{
+    return(
+        read_tsv(
+            file.path(preprocessed_data_path, "plotly_tooltips.tsv")
+        ) %>% mutate(tooltip = chartr("|", "\n", tooltip))
+    )
+}
 
 
 get_mid_matrix <- function(mi_data, peak_id, experiments = NULL)
@@ -114,13 +123,58 @@ reverse_rows <- function(mat)
 }
 
 # write an MID matrix, dropping M+0 and rescaling to [0, 1]
-write_mid_matrix_image <- function(file_name, mids)
+write_mid_matrix_image <- function(file_name, mids, max_mi_fraction = NULL)
 {
     mat <- reverse_rows(c13correct_cols(mids)[-1, ])
-    cat("Scaling image to max = ", max(mat))
+    if(is.null(max_mi_fraction))
+        max_mi_fraction <- max(mat)
     write_image(
-        file_name, mat / max(mat), colorRamp(c("white", "red"))
+        file_name,
+        pmin(mat, max_mi_fraction) / max_mi_fraction,
+        colorRamp(c("white", "red"))
     )
 }
+
+# UMap projection
+
+umap_projection <- function(dm, n_neighbors, random_seed = NULL)
+{
+    if(!is.null(random_seed))
+        set.seed(random_seed)
+
+    umap_config <- umap.defaults
+    umap_config$n_neighbors <- n_neighbors
+    umap_proj <- umap(dm, input = "dist", config = umap_config)
+    
+    return(
+        data.frame(
+            peak_id = rownames(dm),
+            umap_1 = umap_proj$layout[, 1],
+            umap_2 = umap_proj$layout[, 2]
+        )
+    )
+}
+
+plot_umap <- function(umap_proj)
+{
+    umap_proj %>%
+        ggplot(aes(x = umap_1, y = umap_2)) +
+        geom_point(alpha = 0.7, colour = "black") +
+        theme_classic()
+}
+
+plot_umap_interactive <- function(umap_proj, tooltips)
+{
+    ggplotly(
+        umap_proj %>% mutate(tooltip = tooltips) %>%
+            ggplot(aes(x = umap_1, y = umap_2, label = peak_id, text = tooltip)) +
+            geom_point(alpha = 0.7, colour = "black") +
+            geom_text() +
+            theme_classic(),
+        tooltip = "text"
+    )
+}
+
+
 
 
