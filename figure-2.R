@@ -2,13 +2,12 @@
 #  Code to reproduce plots in Figure 2
 #
 
-#library(igraph)
+source("common.R")
 
 library(ggplot2)
 library(plotly)
 library(remn)
 
-source("common.R")
 
 # Read data
 hmec_peak_list <- read_hmec_peak_list()
@@ -20,6 +19,11 @@ n_experiments <- length(hmec_mi_data$experiments)
 
 # verify that MIData peak IDs matches peak list
 stopifnot(all(hmec_mi_data$peak_ids == hmec_peak_list$peak_id))
+
+hmec_dm <- readRDS(
+    file.path(mid_distance_path, 'hmec_dm.rds')
+)
+
 
 #
 #  Fig 2b 13C enrichment
@@ -101,11 +105,6 @@ plot_mid_matrix(c13correct_cols(mids_conv), max_mi_fraction = 0.3)
 # ED Figure 2b MID distance distribution
 #
 
-# read precomputed distance matrix
-hmec_dm <- readRDS(
-    file.path(mid_distance_path, 'hmec_dm.rds')
-)
-
 # histogram of distances, NA set to maximum
 hist(hmec_dm[lower.tri(hmec_dm)], n = 100)
 
@@ -114,39 +113,14 @@ hist(hmec_dm[lower.tri(hmec_dm)], n = 100)
 # Figure 2e UMap projection
 #
 
-library(umap)
+umap_proj <- umap_projection(
+    hmec_dm, n_neighbors = 15, random_seed = 571632932)
 
-# set random seed to make plot reproducible
-set.seed(571632932)
+plot_umap(umap_proj)
 
-umap_config <- umap.defaults
-umap_config$n_neighbors <- 15
+plotly_tooltips <- read_plotly_tooltips()
 
-umap_proj <- umap(hmec_dm, input = "dist", config = umap_config)
-# make sure peaks map correctly
-stopifnot(all(rownames(umap_proj$layout) == hmec_peak_list$peak_id))
-
-umap_df <- data.frame(
-    peak_id = hmec_peak_list$peak_id,
-    peak_ann = paste(hmec_peak_list$peak_id, hmec_peak_list$netid_annotation),
-    umap_1 = umap_proj$layout[, 1],
-    umap_2 = umap_proj$layout[, 2]
-)
-
-# plot projection
-umap_df %>%
-    ggplot(aes(x = umap_1, y = umap_2)) +
-    geom_point(alpha = 0.7, colour = "black") +
-    theme_classic()
-
-# interactive plot with tooltips
-ggplotly(
-    umap_df %>%
-        ggplot(aes(x = umap_1, y = umap_2, label = peak_id, text = peak_ann)) +
-        geom_point(alpha = 0.7, colour = "black") +
-        geom_text() +
-        theme_classic(),
-    tooltip = "text")
+plot_umap_interactive(umap_proj, plotly_tooltips$tooltip)
 
 
 #
