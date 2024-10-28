@@ -33,6 +33,39 @@ saveRDS(
     file.path(mi_data_path, 'hmec_mi_data.rds')
 )
 
+# create corresponding text file for Suppl Data 1
+get_mid_df <- function(mi_data, peak_id)
+{
+    mid_df <- as.data.frame(
+        get_mid_matrix(mi_data, peak_id, mi_data$experiments))
+    # TODO: this should go into the remn package
+    colnames(mid_df) <- unlist(
+        lapply(
+            1:length(mi_data$experiments),
+            function(i)
+                paste(
+                    rep(mi_data$experiments[i], mi_data$exp_n_rep[i]),
+                    1:mi_data$exp_n_rep[i],
+                    sep = '_'
+                )
+        )
+    )
+    return(
+        mid_df %>%
+            mutate(peak_id = peak_id) %>% relocate(peak_id) %>%
+            mutate(mi = 0:(nrow(mid_df)-1)) %>% relocate(mi, .after = peak_id)
+    )
+}
+
+hmec_all_mids <- lapply(
+    hmec_mi_data$peak_ids,
+    function(peak_id) get_mid_df(hmec_mi_data, peak_id)) %>% bind_rows()
+
+write.table(
+    hmec_all_mids, file.path(mi_data_path, 'suppl_data_1.tsv'),
+    sep = '\t', row.names = FALSE
+)            
+   
 
 # Censor false MIs
 hmec_mi_data_censored <- censor_false_mi(
