@@ -33,7 +33,7 @@ saveRDS(
     file.path(mi_data_path, 'hmec_mi_data.rds')
 )
 
-# create corresponding text file for Suppl Data 1
+# create corresponding text file for Suppl Data 2
 get_mid_df <- function(mi_data, peak_id)
 {
     mid_df <- as.data.frame(
@@ -62,10 +62,10 @@ hmec_all_mids <- lapply(
     function(peak_id) get_mid_df(hmec_mi_data, peak_id)) %>% bind_rows()
 
 write.table(
-    hmec_all_mids, file.path(mi_data_path, 'suppl_data_1.tsv'),
+    hmec_all_mids, file.path(mi_data_path, 'suppl_data_2.tsv'),
     sep = '\t', row.names = FALSE
-)            
-   
+)
+
 
 # Censor false MIs
 hmec_mi_data_censored <- censor_false_mi(
