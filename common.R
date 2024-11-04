@@ -169,7 +169,6 @@ plot_umap_interactive <- function(umap_proj, tooltips)
     ggplotly(
         umap_proj %>% mutate(tooltip = tooltips) %>%
             ggplot(aes(x = umap_1, y = umap_2, label = peak_id, text = tooltip)) +
-            geom_point(alpha = 0.7, colour = "black") +
             geom_text() +
             theme_classic(),
         tooltip = "text"
