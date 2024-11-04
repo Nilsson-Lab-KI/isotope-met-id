@@ -4,10 +4,40 @@
 
 source("common.R")
 
+library(stringr)
 
 # preprocess HMEC data
 
-hmec_peak_list <- read_hmec_peak_list()
+# peak list processed by NetID
+netid_peak_list <- read.delim(
+    file.path(input_data_path, "nodelist-netid-pos-neg.csv"),
+    header = T, sep = ","
+)
+# number of putative metabolites (excluding fragments, artefacts)
+netid_peak_list %>%
+    filter(class %in% c('Metabolite', 'Putative metabolite')) %>% nrow()
+
+netid_peak_list <- netid_peak_list %>%
+    # define peak IDs as row number
+    mutate(peak_id = as.character(row_number())) %>%
+    # recover the m/z from neutral mass +/- proton
+    mutate(mz = mass + proton_mass*ion_mode) %>%
+    # drop unused fields
+    select(peak_id, mass, path, ion_mode, mz) %>%
+    rename(netid_annotation = path)
+
+# list of 721 peaks passing QC
+qc_peak_list <- read_tsv(file.path(input_data_path, "qc-peaks-with-flags.tsv")) %>%
+    mutate(peak_id = as.character(peak_id))
+
+# merge peak lists
+hmec_peak_list <-  netid_peak_list %>%
+    inner_join(hmec_peak_list, by = join_by(peak_id))
+write.table(
+    hmec_peak_list, file.path(preprocessed_data_path, 'hmec_peak_list.tsv'),
+    sep = '\t', row.names = FALSE
+)
+
 
 # read peak areas for all peaks
 peak_areas_path <- file.path(input_data_path, "hmec-peak-areas.tsv")

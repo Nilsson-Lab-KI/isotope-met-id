@@ -22,6 +22,7 @@ h2o_mass <- 18.010564683
 nh4_mass <- 18.034374132
 ppm_tolerance <- 10
 
+
 read_tsv <- function(file_path)
 {
     return(
@@ -42,12 +43,12 @@ read_hmec_peak_areas <- function()
     )
 }
 
-# peak list from the HMEC isotope tracing experiment
+# preprocessed peak list from the HMEC isotope tracing experiment
 read_hmec_peak_list <- function()
 {
     return(
         read_tsv(
-            file.path(input_data_path, "qc-peaks-with-flags.tsv")
+            file.path(preprocessed_data_path, "hmec_peak_list.tsv")
         ) %>% mutate(peak_id = as.character(peak_id))
     )
 }
