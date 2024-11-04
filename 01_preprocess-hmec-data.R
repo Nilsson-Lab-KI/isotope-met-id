@@ -40,7 +40,7 @@ hmec_peak_list <-  netid_peak_list %>%
 
 write.table(
     hmec_peak_list, file.path(preprocessed_data_path, 'hmec_peak_list.tsv'),
-    sep = '\t', row.names = FALSE
+    sep = '\t', row.names = FALSE, quote = FALSE
 )
 
 

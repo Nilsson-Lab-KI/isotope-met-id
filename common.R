@@ -43,7 +43,7 @@ read_hmec_peak_areas <- function()
     )
 }
 
-# preprocessed peak list from the HMEC isotope tracing experiment
+# peak list from the HMEC isotope tracing experiment
 read_hmec_peak_list <- function()
 {
     return(
@@ -58,7 +58,7 @@ read_peak_hmdb_compound <- function()
 {
     return(
         read_tsv(
-            file.path(input_data_path, "peak_hmdb_compound.tsv")
+            file.path(preprocessed_data_path, "peak_hmdb_compound.tsv")
         ) %>% mutate(peak_id = as.character(peak_id))
     )
 }
