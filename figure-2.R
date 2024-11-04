@@ -11,7 +11,7 @@ library(remn)
 
 # Read data
 hmec_peak_list <- read_hmec_peak_list()
-hmec_peak_areas <- read_hmec_peak_areas()
+# hmec_peak_areas <- read_hmec_peak_areas()
 
 hmec_mi_data <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.rds'))
 n_peaks <- length(hmec_mi_data$peak_ids)
@@ -20,9 +20,8 @@ n_experiments <- length(hmec_mi_data$experiments)
 # verify that MIData peak IDs matches peak list
 stopifnot(all(hmec_mi_data$peak_ids == hmec_peak_list$peak_id))
 
-hmec_dm <- readRDS(
-    file.path(mid_distance_path, 'hmec_dm.rds')
-)
+# precomputed distance matrix
+hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_dm.rds'))
 
 
 #
@@ -115,11 +114,9 @@ hist(hmec_dm[lower.tri(hmec_dm)], n = 100)
 
 umap_proj <- umap_projection(
     hmec_dm, n_neighbors = 15, random_seed = 571632932)
-
 plot_umap(umap_proj)
 
 plotly_tooltips <- read_plotly_tooltips()
-
 plot_umap_interactive(umap_proj, plotly_tooltips$tooltip)
 
 
@@ -128,7 +125,8 @@ plot_umap_interactive(umap_proj, plotly_tooltips$tooltip)
 #
 
 # all pairwise distances, UMap vs MID distance. this generally does not agree well
-umap_dist <- dist(umap_proj$layout)  # pairwise euclidean distances of 2D UMap projection
+# pairwise euclidean distances of 2D UMap projection
+umap_dist <- umap_proj %>% select(umap_1, umap_2) %>% dist()
 local({
     index <- sample(length(umap_dist), 10000)
     plot(as.dist(hmec_dm)[index], umap_dist[index], col = alpha("black", 0.4))
@@ -153,16 +151,17 @@ plot_mid_matrix(c13correct_cols(mids_cit), max_mi_fraction = 0.3)
 mids_glu <- get_mid_matrix(hmec_mi_data, "6683", selected_exp)
 plot_mid_matrix(c13correct_cols(mids_glu), max_mi_fraction = 0.3)
 
+# 1171 citryl-glutamate (candidate)
 mids_citglu <- get_mid_matrix(hmec_mi_data, "1171", selected_exp)
 plot_mid_matrix(c13correct_cols(mids_citglu), max_mi_fraction = 0.3)
 
-# convolution
+# convolution of citrate and glutamate
 plot_mid_matrix(
     c13correct_cols(convolute_all(mids_cit, mids_glu)),
     max_mi_fraction = 0.3)
 
 #
-#  Figure 2h MID and MS2 network -- from cytoscape
+#  Figure 2h MID and MS2 network was generated in cytoscape
 #
 
 
