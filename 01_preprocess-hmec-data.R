@@ -115,8 +115,6 @@ write.table(
 )
 
 # read peak areas for all peaks
-# TODO: this also contains an old version of known metabolite annotations,
-#       these should be removed
 {
     hmec_peak_areas <- read_tsv(file.path(input_data_path, "hmec-peak-areas.tsv"))
     # order tracer data columns alphabetic by tracer, unlabeled data last
