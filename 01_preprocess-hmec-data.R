@@ -25,9 +25,7 @@ netid_peak_list <- netid_peak_list %>%
     # recover the m/z from neutral mass +/- proton
     mutate(mz = mass + proton_mass*ion_mode) %>%
     # drop unused fields
-    # NOTE: do we need the NetID "path" annotation? Might be confusing
-    select(peak_id, mass, path, ion_mode, mz) %>%
-    rename(netid_annotation = path)
+    select(peak_id, mass, ion_mode, mz)
 
 # list of 721 peaks passing QC
 qc_peak_list <- read_tsv(file.path(input_data_path, "qc-peaks-with-flags.tsv")) %>%
