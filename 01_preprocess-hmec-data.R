@@ -32,7 +32,8 @@ netid_peak_list <- netid_peak_list %>%
 # list of 721 peaks passing QC
 qc_peak_list <- read_tsv(file.path(input_data_path, "qc-peaks-with-flags.tsv")) %>%
     mutate(peak_id = as.character(peak_id)) %>%
-    mutate(known_met_id = na_if(known_met_id, ""))
+    mutate(known_met_id = na_if(known_met_id, "")) %>%
+    mutate(inchi_key = na_if(inchi_key, ""))
 
 # merge peak lists
 hmec_peak_list <-  netid_peak_list %>%
