@@ -33,7 +33,8 @@ netid_peak_list <- netid_peak_list %>%
 qc_peak_list <- read_tsv(file.path(input_data_path, "qc-peaks-with-flags.tsv")) %>%
     mutate(peak_id = as.character(peak_id)) %>%
     mutate(known_met_id = na_if(known_met_id, "")) %>%
-    mutate(inchi_key = na_if(inchi_key, ""))
+    mutate(inchi_key = na_if(inchi_key, "")) %>%
+    mutate(skeleton = na_if(skeleton, ""))
 
 # merge peak lists
 hmec_peak_list <-  netid_peak_list %>%
@@ -68,6 +69,9 @@ stopifnot(
         group_by(skeleton) %>% filter(n() > 1) %>% nrow == 0)
 
 # collapse to table of unique molecular skeletons, with a representative inchi and mass
+# NOTE: some compounds have multiple entries in HMDB, with different inchis
+#       (e.g. with and w/o stereochemistry information)
+#       this will retain only one inchi key (arbitrarily)
 hmdb_compounds <- hmdb_compounds %>%
     select(skeleton, inchi_key, name, hmdb_accession, neutral_mass) %>%
     distinct(skeleton, .keep_all = TRUE)
@@ -85,6 +89,7 @@ ion_modification <- data.frame(
 
 # generate possible ions from peak list
 hmec_peak_ions <- hmec_peak_list %>%
+    select(peak_id, mz, ion_mode) %>%
     inner_join(
         ion_modification,
         by = join_by(ion_mode),
@@ -99,8 +104,7 @@ hmec_peak_ions <- hmec_peak_list %>%
 peak_hmdb_compound <- hmdb_compounds %>%
     inner_join(
         hmec_peak_ions,
-        by = join_by(between(neutral_mass, mass_min, mass_max))
-    ) %>%
+        by = join_by(between(neutral_mass, mass_min, mass_max))) %>%
     select(
         peak_id, ion_mode, mz,
         hmdb_accession, name, inchi_key, skeleton, neutral_mass,
