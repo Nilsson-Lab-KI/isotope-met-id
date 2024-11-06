@@ -1,7 +1,6 @@
 
 source("common.R")
 
-library(remn)
 
 hmec_mi_data <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.rds'))
 n_peaks <- length(hmec_mi_data$peak_ids)
@@ -12,7 +11,7 @@ n_experiments <- length(hmec_mi_data$experiments)
 # all other missing convolutions will yield NA distance
 assign_list[hmec_dm, hmec_conv_index] <- conv_reduce_all(
     hmec_mi_data, 1:(n_experiments - 1),
-    f = remn::euclidean_sum_dist,
+    f = midist::euclidean_sum_dist,
     g = which.min,
     impute = 1
 )

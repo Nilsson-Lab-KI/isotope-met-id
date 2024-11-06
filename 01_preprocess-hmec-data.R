@@ -4,7 +4,6 @@
 
 source("common.R")
 
-library(stringr)
 
 #
 # HMEC experiment peak list

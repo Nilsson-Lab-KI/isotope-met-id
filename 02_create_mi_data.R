@@ -2,9 +2,8 @@
 #  Create MI data object
 #
 
-library(remn)
-
 source("common.R")
+
 
 # Read HMEC peak areas
 hmec_peak_areas <- read_hmec_peak_areas()

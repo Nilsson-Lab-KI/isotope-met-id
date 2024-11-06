@@ -2,10 +2,8 @@
 #  Code to reproduce plots in Figure 1
 #
 
-
-library(remn)
-
 source("common.R")
+
 
 hmec_mi_data <- readRDS(file.path(mi_data_path, 'hmec_mi_data.rds'))
 hmec_mi_data_censored <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.rds'))

@@ -5,8 +5,11 @@
 #
 
 library(dplyr)
+library(ggplot2)
+library(midist)
+library(plotly)
+library(stringr)
 library(umap)
-
 
 # data folder common paths
 

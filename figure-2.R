@@ -4,10 +4,6 @@
 
 source("common.R")
 
-library(ggplot2)
-library(plotly)
-library(remn)
-
 
 # Read data
 hmec_peak_list <- read_hmec_peak_list()

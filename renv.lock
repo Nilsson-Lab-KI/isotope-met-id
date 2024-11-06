@@ -81,18 +81,6 @@
       ],
       "Hash": "45f0398006e83a5b10b72a90663d8d8c"
     },
-    "RCurl": {
-      "Package": "RCurl",
-      "Version": "1.98-1.12",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "bitops",
-        "methods"
-      ],
-      "Hash": "1d6ed2d006d483f31c6d5531f3a39923"
-    },
     "RSpectra": {
       "Package": "RSpectra",
       "Version": "0.16-1",
@@ -161,13 +149,6 @@
         "R"
       ],
       "Hash": "543776ae6848fde2f48ff3816d0628bc"
-    },
-    "bitops": {
-      "Package": "bitops",
-      "Version": "1.0-7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b7d8d8ee39869c18d8846a184dd8a1af"
     },
     "bslib": {
       "Package": "bslib",
@@ -670,6 +651,27 @@
       ],
       "Hash": "3460beba7ccc8946249ba35327ba902a"
     },
+    "midist": {
+      "Package": "midist",
+      "Version": "0.1.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "Nilsson-Lab-KI",
+      "RemoteRepo": "midist",
+      "RemoteRef": "main",
+      "RemoteSha": "809a8faab04437d3433b642b4545f3fec38a3f09",
+      "Requirements": [
+        "ggplot2",
+        "gridExtra",
+        "lsei",
+        "reshape2",
+        "scales",
+        "stats",
+        "stringr"
+      ],
+      "Hash": "fcfcf9fb403588e0d69f231ed93cba89"
+    },
     "mime": {
       "Package": "mime",
       "Version": "0.12",
@@ -834,20 +836,6 @@
         "R"
       ],
       "Hash": "5e3c5dc0b071b21fa128676560dbe94d"
-    },
-    "remn": {
-      "Package": "remn",
-      "Version": "0.0.0.9000",
-      "Source": "unknown",
-      "Requirements": [
-        "ggplot2",
-        "gridExtra",
-        "lsei",
-        "reshape2",
-        "stats",
-        "stringr"
-      ],
-      "Hash": "3bbb1917863646b879de332da78e4f93"
     },
     "renv": {
       "Package": "renv",
