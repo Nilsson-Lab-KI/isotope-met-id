@@ -78,9 +78,9 @@ read_metabolite_pathway <- function()
 read_plotly_tooltips <- function()
 {
     return(
-        read_tsv(
-            file.path(preprocessed_data_path, "plotly_tooltips.tsv")
-        ) %>% mutate(tooltip = chartr("|", "\n", tooltip))
+        read_tsv(file.path(preprocessed_data_path, "plotly_tooltips.tsv")) %>%
+            tibble::column_to_rownames('peak_id') %>%
+            mutate(tooltip = chartr("|", "\n", tooltip))
     )
 }
 
@@ -159,11 +159,11 @@ umap_projection <- function(dm, n_neighbors, random_seed = NULL)
     )
 }
 
-plot_umap <- function(umap_proj)
+plot_umap <- function(umap_proj, colors = "black")
 {
     umap_proj %>%
         ggplot(aes(x = umap_1, y = umap_2)) +
-        geom_point(alpha = 0.7, colour = "black") +
+        geom_point(alpha = 0.7, colour = colors) +
         theme_classic()
 }
 
@@ -178,6 +178,14 @@ plot_umap_interactive <- function(umap_proj, tooltips)
     )
 }
 
-
+# extract known neighbors from a peak list
+nearest_known_table <- function(neighbors_ids, peak_list)
+{
+    data.frame(peak_id = neighbors_ids, rank = 1:length(neighbors_ids)) %>%
+        inner_join(
+            peak_list %>% filter(!is.na(known_met_id)),
+            join_by('peak_id')) %>%
+        select(rank, known_met_id, inchi_key, name)
+}
 
 

@@ -7,7 +7,6 @@ source("common.R")
 
 # Read data
 hmec_peak_list <- read_hmec_peak_list()
-# hmec_peak_areas <- read_hmec_peak_areas()
 
 hmec_mi_data <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.rds'))
 n_peaks <- length(hmec_mi_data$peak_ids)
@@ -110,8 +109,25 @@ hist(hmec_dm[lower.tri(hmec_dm)], n = 100)
 
 umap_proj <- umap_projection(
     hmec_dm, n_neighbors = 15, random_seed = 571632932)
-plot_umap(umap_proj)
 
+fig2e_clusters <- read_tsv(file.path(input_data_path, "fig_2_clusters.tsv")) %>%
+    mutate(peak_id = as.character(peak_id)) %>%
+    mutate(
+        color = case_when(
+            cluster_name %in% c("asn", "glu/gln", "ser lipids", "sugars", "val") ~"#0003FF",
+            cluster_name %in% c("glutathione", "sulfur amino acids", "trp (indole)") ~"#50F200",
+            cluster_name %in% c("leu/ile", "purines", "pyrimidines", "thr") ~"#7854A2",
+            cluster_name %in% c("his", "lysine", "TCA & asp") ~"#DF1B53",
+            cluster_name %in% c("gln", "ser") ~"#ABBDFF"))
+
+fig2e_colors <- hmec_peak_list %>%
+    left_join(fig2e_clusters, by = 'peak_id') %>%
+    mutate(color = coalesce(color, "#BFBFBF")) %>%
+    pull(color)
+
+plot_umap(umap_proj, colors = fig2e_colors)
+
+# interactive plot with peak numbers
 plotly_tooltips <- read_plotly_tooltips()
 plot_umap_interactive(umap_proj, plotly_tooltips$tooltip)
 
