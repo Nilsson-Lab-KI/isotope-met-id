@@ -1,11 +1,13 @@
 #
-#  Create MI data object
+#  Create MI data objects
 #
 
 source("common.R")
 
+#
+# HMEC data
+#
 
-# Read HMEC peak areas
 hmec_peak_areas <- read_hmec_peak_areas()
 
 # drop the experiment replicate number from column names
@@ -77,3 +79,45 @@ saveRDS(
     hmec_mi_data_censored,
     file.path(mi_data_path, 'hmec_mi_data_censored.rds')
 )
+
+#
+# Simulated data
+#
+
+sim_peak_areas <- read_tsv(
+   file.path(input_data_path, "simulated_mids_t75.tsv"))
+
+experiment_names <- colnames(sim_peak_areas)[-(1:2)]
+
+# replicate each experiment 3 times and create a new data frame
+sim_peak_areas_replicated <- cbind(
+   sim_peak_areas[1:2],
+      do.call(
+      cbind,
+      lapply(
+         experiment_names,
+         function(exp_name) {
+            sapply(
+               paste(exp_name, 1:3, sep="_"),
+               function(x) sim_peak_areas[[exp_name]])
+         }
+      )
+   )
+)
+
+experiment_names_replicated <- sim_peak_areas_replicated[-(1:2)] %>%
+   colnames %>% str_sub(end = -3)
+
+# Create MIData object
+sim_mi_data <- MIData(
+   sim_peak_areas_replicated,
+   exp_names = experiment_names_replicated,
+   exp_columns = 3:length(sim_peak_areas_replicated)
+)
+
+# Write MIData object
+saveRDS(
+   sim_mi_data,
+   file.path(mi_data_path, 'simulated_mi_data_t75.rds')
+)
+
