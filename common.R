@@ -18,12 +18,21 @@ preprocessed_data_path <- "01_preprocessed_data"
 mi_data_path <- "02_mi_data"
 mid_distance_path <- "03_mid_distance"
 gold_standard_path <- "04_gold_standard"
+sim_mid_distance_path <- "05_sim_mid_distance"
+
 
 # constants
 proton_mass <- 1.007276466621
 h2o_mass <- 18.010564683
 nh4_mass <- 18.034374132
 ppm_tolerance <- 10
+
+
+create_dir_if_not_exists <- function(dir_path)
+{
+   if(!file.exists(dir_path))
+      dir.create(dir_path, recursive = TRUE)
+}
 
 
 read_tsv <- function(file_path)
@@ -187,5 +196,42 @@ nearest_known_table <- function(neighbors_ids, peak_list)
             join_by('peak_id')) %>%
         select(rank, known_met_id, inchi_key, name)
 }
+
+
+# file paths for simulated distance matrices
+sim_dir_path <- function(stdev)
+{
+   file.path(
+      sim_mid_distance_path,
+      paste('stdev', stdev, sep = '_')
+   )
+}
+
+sim_mi_data_file_name <- function(rep_nr)
+{
+   paste0(paste('rep', rep_nr, 'midata', sep = '_'), '.rds')
+}
+
+sim_mi_data_path <- function(stdev, rep_nr)
+{
+   file.path(
+      sim_dir_path(stdev),
+      sim_mi_data_file_name(rep_nr)
+   )
+}
+
+sim_dm_file_name <- function(rep_nr)
+{
+   paste0(paste('rep', rep_nr, 'dm', sep = '_'), '.rds')
+}
+
+sim_dm_path <- function(stdev, rep_nr)
+{
+   file.path(
+      sim_dir_path(stdev),
+      sim_dm_file_name(rep_nr)
+   )
+}
+
 
 
