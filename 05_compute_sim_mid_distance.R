@@ -5,15 +5,14 @@
 
 source("common.R")
 
-# TODO: this rds file was computed previousl
-# need to regenerate it in 02_create_mi_data.R
-sim_mi_data <- readRDS(file.path(mi_data_path, 'sim_mi_data.rds'))
+# import simulated MIDs, time point 75
+sim_mi_data <- readRDS(file.path(mi_data_path, 'simulated_mi_data_t75.rds'))
 n_experiments <- length(sim_mi_data$experiments)
 
-# add dirichlet noise, compute distance matrices and repeat
+# add dirichlet noise and compute distance matrices
 
 stdevs <- c(0.01, 0.05, 0.1)
-n_resamples <- 1
+n_resamples <- 10
 
 {
    set.seed(7462931)
@@ -33,11 +32,22 @@ n_resamples <- 1
             f = midist::euclidean_sum_dist,
             g = which.min
          )
-         # impute missing values with maximal distance
-         max_distance <- max(sim_dm, na.rm = TRUE)
-         sim_dm[which(is.na(sim_dm))] <- max_distance
-         
+         sim_dm <- replace_na_with_max(sim_dm)
          saveRDS(sim_dm, sim_dm_path(stdev, rep_nr))
       }
    }
+}
+
+# without noise
+
+{
+   create_dir_if_not_exists(sim_dir_path(stdev = 0))
+   assign_list[sim_dm, sim_conv_index] <- conv_reduce_all(
+      sim_mi_data,
+      1:n_experiments,
+      f = midist::euclidean_sum_dist,
+      g = which.min
+   )
+   sim_dm <- replace_na_with_max(sim_dm)
+   saveRDS(sim_dm, sim_dm_path(stdev = 0, rep_nr = 1))
 }
