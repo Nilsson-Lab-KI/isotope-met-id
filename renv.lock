@@ -656,11 +656,11 @@
       "Version": "0.1.0",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
       "RemoteUsername": "Nilsson-Lab-KI",
       "RemoteRepo": "midist",
       "RemoteRef": "main",
-      "RemoteSha": "809a8faab04437d3433b642b4545f3fec38a3f09",
+      "RemoteSha": "820cae6749c2c23b6e6cb85f828e24f3cac9e36b",
+      "RemoteHost": "api.github.com",
       "Requirements": [
         "ggplot2",
         "gridExtra",
@@ -670,7 +670,7 @@
         "stats",
         "stringr"
       ],
-      "Hash": "fcfcf9fb403588e0d69f231ed93cba89"
+      "Hash": "3ab9fc8c1dd9895816cec5e199affe75"
     },
     "mime": {
       "Package": "mime",
