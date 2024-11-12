@@ -29,6 +29,7 @@ saveRDS(
 
 # threshold fraction derived matrix to get a binary gold standard matrix
 gold_standard <- ifelse(fraction_derived > 0.5, 1, 0)
+diag(gold_standard) <- 0
 stopifnot(
     all(!is.na(gold_standard))
 )
