@@ -39,6 +39,7 @@ plot_umap(umap_proj)
 #plotly_tooltips <- read_plotly_tooltips()
 plot_umap_interactive(umap_proj, rownames(sim_dm))
 
+
 #
 # Figure 3d TCA cycle
 #
@@ -71,17 +72,17 @@ plot_umap_interactive(umap_proj, tca_met_ids)
 
 # explore MIDS
 
-plot_tca_mid <- function(met_id)
-{
-   plot_mid_matrix(
-      get_mid_matrix(sim_mi_data, met_id, sim_mi_data_tca$experiments),
-      max_mi_fraction = 0.3, plot_title = met_id
-   )
-}
-
-plot_tca_mid("cit_m")
-plot_tca_mid("icit_m")
-plot_tca_mid("oaa_m")
+# plot_tca_mid <- function(met_id)
+# {
+#    plot_mid_matrix(
+#       get_mid_matrix(sim_mi_data, met_id, sim_mi_data_tca$experiments),
+#       max_mi_fraction = 0.3, plot_title = met_id
+#    )
+# }
+# 
+# plot_tca_mid("cit_m")
+# plot_tca_mid("icit_m")
+# plot_tca_mid("oaa_m")
 
 #
 # Figure 3e fatty acid synthesis
@@ -108,16 +109,12 @@ gold_standard <- readRDS(file.path(gold_standard_path, 'gold_standard.rds'))
 
 mi_stdev_range <- c(0.01, 0.05, 0.1)
 n_replicates <- 10
-downsample_factor <- 20    # reduce number of pairs plotted by this factor
-
-all(colnames(sim_dm) == colnames(gold_standard))
 
 accuracy_rep <- function(mi_stdev, rep_nr)
 {
    sim_dm <- readRDS(sim_dm_path(mi_stdev, rep_nr))
    continuous_accuracy(sim_dm, gold_standard) %>%
       tibble::rowid_to_column('pair_rank') %>%
-      filter((pair_rank - 1) %% downsample_factor == 0) %>%
       mutate(mi_stdev = mi_stdev) %>%
       mutate(rep_nr = rep_nr)
 }
@@ -136,8 +133,6 @@ accuracy <- bind_rows(
    accuracy_rep(0, 1)
 )
 
-accuracy %>% filter(mi_stdev == 0) %>% filter(rep_nr == 1) %>% head()
-
 # average precision and recall values over replicate samples
 mean_accuracy <- accuracy %>%
    group_by(mi_stdev, pair_rank) %>%
@@ -145,13 +140,15 @@ mean_accuracy <- accuracy %>%
       mean_precision = mean(precision),
       mean_recall = mean(recall))
 
+# plot curves, simplified to ~100 points
 mean_accuracy %>%
-   filter(pair_rank > 1) %>%
+   mutate(mean_recall = round(mean_recall, digits = 2)) %>%
+   distinct(mean_recall, .keep_all = TRUE) %>%
    ggplot(aes(x = mean_recall, y = mean_precision, group = mi_stdev, color = factor(mi_stdev))) +
       geom_line() +
       theme_classic() + xlim(0, 1) + ylim(0, 1)
 
-
+   
 #
 # Figure 3g precision-recall curves for subsets of metabolites
 #
@@ -159,18 +156,14 @@ mean_accuracy %>%
 mi_stdev <- 0.01
 subset_sizes <- c(300, 200, 100, 50)
 n_replicates <- 10
-max_curve_points <- 1000
 
 accuracy_subset_rep <- function(subset_size, rep_nr)
 {
    subset_dm <- readRDS(subset_dm_path(subset_size, rep_nr))
    subset_gold_standard <- gold_standard[rownames(subset_dm), colnames(subset_dm)]
    
-   n_pairs <- nrow(subset_dm) * (nrow(subset_dm) - 1) / 2
-   downsample_factor <- ceiling(n_pairs / max_curve_points)
    continuous_accuracy(subset_dm, subset_gold_standard) %>%
       tibble::rowid_to_column('pair_rank') %>%
-      filter((pair_rank - 1) %% downsample_factor == 0) %>%
       mutate(subset_size = subset_size) %>%
       mutate(rep_nr = rep_nr)
 }
@@ -193,10 +186,72 @@ mean_accuracy <- accuracy %>%
       mean_recall = mean(recall))
 
 mean_accuracy %>%
-   filter(pair_rank > 1) %>%
+   mutate(mean_recall = round(mean_recall, digits = 2)) %>%
+   distinct(mean_recall, .keep_all = TRUE) %>%
    ggplot(aes(x = mean_recall, y = mean_precision, group = subset_size, color = factor(subset_size))) +
    geom_line() +
    theme_classic() + xlim(0, 1) + ylim(0, 1)
+
+
+#
+# Figure 3h Area undet PR curve (AUPR) for pairs, individual tracers
+#
+
+
+#
+# Figure 3i metabolite ranks (all tracers)
+#
+
+mi_stdev <- 0.01
+sim_dm <- readRDS(sim_dm_path(mi_stdev, rep_nr = 1))
+
+# matrix where each column is a list of neighbor ranks
+distance_ranks <- function(dm)
+{
+   diag(dm) <- NA
+   apply(
+      dm, MARGIN = 2,
+      function(col) rank(col, na.last = TRUE, ties.method = "first")
+   )
+}
+
+# median ranks of gold standard neighbors
+median_ranks <- function(rank_matrix, gold_standard)
+{
+   apply(
+      rank_matrix * gold_standard,
+      MARGIN = 2,
+      function(col) median(col[col != 0])
+   )
+}
+
+permute_columns <- function(mat)
+{
+   apply(mat, MARGIN = 2, function(col) sample(col, size = nrow(mat)))
+}
+
+{
+   set.seed(84771582)
+   sim_dm_ranks <- distance_ranks(sim_dm)
+   metabolite_ranks = data.frame(
+      median_rank = median_ranks(sim_dm_ranks, gold_standard),
+      random_rank = median_ranks(permute_columns(sim_dm_ranks), gold_standard)
+   )
+}
+
+metabolite_ranks_long <- metabolite_ranks %>%
+   arrange(median_rank) %>%
+   tibble::rowid_to_column(var = "index") %>%
+   pivot_longer(cols = c('median_rank', 'random_rank'), values_to = 'rank', names_to = 'rank_type')
+
+metabolite_ranks_long %>%
+   ggplot(aes(x = index, y = rank, group = rank_type, color = rank_type)) +
+      geom_point() +
+      labs(x = NULL, y = "Median rank") + 
+      scale_y_reverse() +
+      scale_color_manual(values = c("red", "black")) +
+      theme_classic() 
+
 
 #
 # ED Figure 3b
