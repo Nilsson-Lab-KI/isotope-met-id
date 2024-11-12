@@ -198,6 +198,9 @@ nearest_known_table <- function(neighbors_ids, peak_list)
         select(rank, known_met_id, inchi_key, name)
 }
 
+#
+# paths for storing simulated data
+#
 
 # file paths for simulated distance matrices with noise
 sim_dir_path <- function(stdev)
@@ -218,6 +221,7 @@ sim_mi_data_path <- function(stdev, rep_nr)
    file.path(sim_dir_path(stdev), sim_mi_data_file_name(rep_nr))
 }
 
+# distance matrix files based on all experiments
 sim_dm_file_name <- function(rep_nr)
 {
    paste0(paste('rep', rep_nr, 'dm', sep = '_'), '.rds')
@@ -227,6 +231,18 @@ sim_dm_path <- function(stdev, rep_nr)
 {
    file.path(sim_dir_path(stdev), sim_dm_file_name(rep_nr))
 }
+
+# distance matrix files based on individual experiments
+sim_dm_ind_exp_file_name <- function(experiment, rep_nr)
+{
+   paste0(paste('rep', rep_nr, experiment, 'dm', sep = '_'), '.rds')
+}
+
+sim_dm_ind_exp_path <- function(stdev, experiment, rep_nr)
+{
+   file.path(sim_dir_path(stdev), sim_dm_ind_exp_file_name(experiment, rep_nr))
+}
+
 
 # for distance matrices for subsets of metabolites
 subset_dir_path <- function(subset_size)
@@ -244,5 +260,6 @@ subset_dm_path <- function(subset_size, rep_nr)
    file.path(subset_dir_path(subset_size), sim_dm_file_name(rep_nr))
 
 }
+
 
 
