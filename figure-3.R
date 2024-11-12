@@ -194,8 +194,74 @@ mean_accuracy %>%
 
 
 #
-# Figure 3h Area undet PR curve (AUPR) for pairs, individual tracers
+# Figure 3h Area under PR curve (AUPR) for pairs, individual tracers
 #
+
+gold_standard <- readRDS(file.path(gold_standard_path, 'gold_standard.rds'))
+
+mi_stdev <- 0.01
+n_replicates <- 10
+sim_dm <- readRDS(sim_dm_ind_exp_path(mi_stdev, "glc", 1))
+
+experiments <- c(
+   readRDS(sim_mi_data_path(mi_stdev, 1))$experiments,
+   "all"
+)
+
+# compute AUPR from an accuracy data.frame with columns 'recall', 'precision'
+# rows are assumed to be sorted by the 'recall' column
+aupr <- function(accuracy)
+{
+   n <- nrow(accuracy)
+   sum(
+      diff(accuracy$recall) * (accuracy$precision[-n] + accuracy$precision[-1]) * 0.5
+   )
+}
+
+aupr_rep <- function(experiment, rep_nr)
+{
+   sim_dm <- readRDS(
+      ifelse(
+         experiment == "all",
+         sim_dm_path(mi_stdev, rep_nr),
+         sim_dm_ind_exp_path(mi_stdev, experiment, rep_nr)))
+   data.frame(
+      experiment = experiment,
+      rep_nr = rep_nr,
+      aupr = continuous_accuracy(sim_dm, gold_standard) %>% aupr()
+   )
+}
+
+aupr_experiment <- function(experiment)
+{
+   bind_rows(
+      lapply(
+         1:n_replicates,
+         function(rep_nr) aupr_rep(experiment, rep_nr)))
+}
+
+aupr_all <- bind_rows(
+   lapply(experiments, aupr_experiment),
+)
+
+aupr_all_mean_sd <- aupr_all %>%
+   mutate(experiment = factor(experiment, levels = experiments)) %>%
+   group_by(experiment) %>%
+   summarize(
+      aupr_mean = mean(aupr),
+      aupr_sd = sd(aupr))
+
+aupr_all_mean_sd %>%
+   ggplot(aes(experiment, aupr_mean, fill = experiment)) +
+      geom_bar(
+         stat = "identity",
+         position = position_dodge(width = 0.8), width = 0.7, fill = "gray") +
+      geom_errorbar(
+         aes(ymin = aupr_mean - aupr_sd, ymax = aupr_mean + aupr_sd),
+         position = position_dodge(width = 0.8), width = 0.25) +
+      labs(x = "Experiment", y = "AUPR") +
+      theme_classic() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 #
@@ -251,6 +317,10 @@ metabolite_ranks_long %>%
       scale_y_reverse() +
       scale_color_manual(values = c("red", "black")) +
       theme_classic() 
+
+#
+# Figure 3i metabolite ranks per experiment
+#
 
 
 #
