@@ -8,7 +8,6 @@ atp	Adenine metabolism
 amp	Adenine metabolism
 adp	Adenine metabolism
 din	Adenosine catabolism
-hxan	Adenosine catabolism
 ins	Adenosine catabolism
 dad-2	Adenosine catabolism
 ade	Adenosine catabolism
@@ -113,21 +112,18 @@ g3p	Lower glycolysis
 dhap	Lower glycolysis
 glyc3p	Lower glycolysis
 lac-L	Lower glycolysis
-b2coa	Lysine catabolism
-3hbcoa	Lysine catabolism
+1pipdn2c	Lysine catabolism
 2oxoadp	Lysine catabolism
-saccrp-L	Lysine catabolism
-lys-L	Lysine catabolism
+3hbcoa	Lysine catabolism
+6a2ohxnt	Lysine catabolism
+b2coa	Lysine catabolism
+glutcoa	Lysine catabolism
 L2aadp	Lysine catabolism
 L2aadp6sa	Lysine catabolism
-glutcoa	Lysine catabolism
-L2aadp6sa	Lysine oxidation (pipecolate)
-thp2c	Lysine oxidation (pipecolate)
-6a2ohxnt	Lysine oxidation (pipecolate)
-1pipdn2c	Lysine oxidation (pipecolate)
-thp2c	Lysine oxidation (pipecolate)
-Lpipecol	Lysine oxidation (pipecolate)
-lys-L	Lysine oxidation (pipecolate)
+Lpipecol	Lysine catabolism
+lys-L	Lysine catabolism
+saccrp-L	Lysine catabolism
+thp2c	Lysine catabolism
 fald	Nethanol catabolism
 meoh	Nethanol catabolism
 Sfglutth	Nethanol catabolism
@@ -154,7 +150,6 @@ dmpp	Mevalonate pathway
 5forthf	One-carbon pool
 10fthf	One-carbon pool
 for	One-carbon pool
-methf	One-carbon pool
 mlthf	One-carbon pool
 5mthf	One-carbon pool
 methf	One-carbon pool
@@ -192,7 +187,6 @@ sprm	Polyamine synthesis
 ametam	Polyamine synthesis
 xtsn	Purine catabolism
 xan	Purine catabolism
-xan	Purine catabolism
 urate	Purine catabolism
 hxan	Purine catabolism
 25aics	Purine synthesis
@@ -225,7 +219,6 @@ zymstnl	Sterol synthesis
 zymst	Sterol synthesis
 chlstol	Sterol synthesis
 chsterol	Sterol synthesis
-frdp	Sterol synthesis
 akg	TCA cycle
 cit	TCA cycle
 oaa	TCA cycle
