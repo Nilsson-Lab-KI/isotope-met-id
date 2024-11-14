@@ -240,7 +240,11 @@ sim_dm_ind_exp_file_name <- function(experiment, rep_nr)
 
 sim_dm_ind_exp_path <- function(stdev, experiment, rep_nr)
 {
-   file.path(sim_dir_path(stdev), sim_dm_ind_exp_file_name(experiment, rep_nr))
+   ifelse(
+      experiment == "all",
+      sim_dm_path(stdev, rep_nr),
+      file.path(sim_dir_path(stdev), sim_dm_ind_exp_file_name(experiment, rep_nr))
+   )
 }
 
 

@@ -203,10 +203,8 @@ mi_stdev <- 0.01
 n_replicates <- 10
 sim_dm <- readRDS(sim_dm_ind_exp_path(mi_stdev, "glc", 1))
 
-experiments <- c(
-   readRDS(sim_mi_data_path(mi_stdev, 1))$experiments,
-   "all"
-)
+experiments <- readRDS(sim_mi_data_path(mi_stdev, 1))$experiments
+n_experiments <- length(experiments)
 
 # compute AUPR from an accuracy data.frame with columns 'recall', 'precision'
 # rows are assumed to be sorted by the 'recall' column
@@ -220,11 +218,7 @@ aupr <- function(accuracy)
 
 aupr_rep <- function(experiment, rep_nr)
 {
-   sim_dm <- readRDS(
-      ifelse(
-         experiment == "all",
-         sim_dm_path(mi_stdev, rep_nr),
-         sim_dm_ind_exp_path(mi_stdev, experiment, rep_nr)))
+   sim_dm <- readRDS(sim_dm_ind_exp_path(mi_stdev, experiment, rep_nr))
    data.frame(
       experiment = experiment,
       rep_nr = rep_nr,
@@ -241,7 +235,7 @@ aupr_experiment <- function(experiment)
 }
 
 aupr_all <- bind_rows(
-   lapply(experiments, aupr_experiment),
+   lapply(c(experiments, "all"), aupr_experiment),
 )
 
 aupr_all_mean_sd <- aupr_all %>%
@@ -277,7 +271,7 @@ distance_ranks <- function(dm)
    diag(dm) <- NA
    apply(
       dm, MARGIN = 2,
-      function(col) rank(col, na.last = TRUE, ties.method = "first")
+      function(col) rank(col, na.last = TRUE, ties.method = "average")
    )
 }
 
@@ -318,12 +312,56 @@ metabolite_ranks_long %>%
       scale_color_manual(values = c("red", "black")) +
       theme_classic() 
 
-#
-# Figure 3i metabolite ranks per experiment
-#
-
 
 #
+# Figure 3j metabolite ranks per experiment
+#
+
+# TEMPORARY: test with Deniz' data
+
+load(
+   file.path("C:/tmp/isotope-met-id-deniz", "data", "reverse-engineering",
+             "Results", "simulation", "Rdata_files", "t_75_low_noise_sample_1_N404.RData"))
+names(matrices) <- c("all", experiments)
+
+
+ranks_experiment <- function(experiment)
+{
+   sim_dm <- readRDS(sim_dm_ind_exp_path(stdev = 0.01, experiment, rep_nr = 1))
+   #sim_dm <- matrices[[experiment]]$distance_matrix
+   sim_dm_ranks <- distance_ranks(sim_dm)
+   median_ranks(sim_dm_ranks, gold_standard)
+}
+
+# this yields a metabolites x experiments matrix
+# contains NAs for a few metabolites that have no neighbors in gold standard
+rank_threshold <- 20
+ranks_matrix <- sapply(c(experiments, "all"), ranks_experiment) %>% replace_na_with_max()
+ranks_matrix <- pmin(ranks_matrix, rank_threshold+1)
+#ranks_matrix <- 1 - pmin(ranks_matrix, rank_threshold)/rank_threshold
+
+# cluster metabolites
+metabolite_clust <- ranks_matrix[, 1:n_experiments] %>% dist() %>% hclust(method = "ward.D")
+metabolite_order <- metabolite_clust$order
+
+# cluster individual tracers, keep "all" in last column
+experiment_clust <- ranks_matrix[, 1:n_experiments] %>% t() %>%
+   dist() %>% hclust(method = "ward.D")
+experiment_order <-  c(experiment_clust$order, n_experiments+1)
+
+plot(experiment_clust)
+
+# TODO: export plot_matrix from midist
+ranks_matrix[metabolite_order, rev(experiment_order)] %>% t() %>%
+   midist:::plot_matrix() +
+      theme(axis.ticks = element_blank(), axis.text.x = element_blank())
+
+image(
+   ranks_matrix[rev(metabolite_order), rev(experiment_order)],
+   col = colorRampPalette(c("red", "white"))(rank_threshold)
+)
+
+   #
 # ED Figure 3b
 #
 
