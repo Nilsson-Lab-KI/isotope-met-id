@@ -57,6 +57,8 @@ n_peaks <- length(hmec_mi_data$peak_ids)
     plot_mid_barchart(c13correct_cols(udpglc_mids))
 }
 
+
+
 #
 # ED Figure 1a,b
 #
@@ -92,12 +94,40 @@ enrichment_censored <- data.frame(
     points(x = (1:n_peaks), y = enrichment_censored$unlabeled, col = "blue")
 }
 
+#
+# Figure 1c, toy example
+#
+
+mid_A <- c(0.7, 0.02, 0.08, 0.2)
+mid_B <- c(0.35, 0.05, 0.4, 0.1, 0.01, 0.09)
+mid_C1 <- c(0.9, 0.1, 0)
+mid_C2 <- c(0.5, 0.05, 0.45)
+mid_C3 <- c(0.1, 0.05, 0.85)
+
+barplot(mid_A, ylim = c(0,1))
+
+barplot(mid_C1, ylim = c(0,1))
+barplot(mid_C2, ylim = c(0,1))
+barplot(mid_C3, ylim = c(0,1))
+
+barplot(
+   matrix(c(convolute(mid_A, mid_C1), mid_B), nrow = 2, byrow = TRUE),
+   ylim = c(0,1), beside = TRUE)
+barplot(
+   matrix(c(convolute(mid_A, mid_C2), mid_B), nrow = 2, byrow = TRUE),
+   ylim = c(0,1), beside = TRUE)
+barplot(
+   matrix(c(convolute(mid_A, mid_C3), mid_B), nrow = 2, byrow = TRUE),
+   ylim = c(0,1), beside = TRUE)
+
+euclidean_dist(convolute(mid_A, mid_C1), mid_B)
+euclidean_dist(convolute(mid_A, mid_C2), mid_B)
+euclidean_dist(convolute(mid_A, mid_C3), mid_B)
 
 
 #
 # Figure 1d
 #
-
 
 # calculate all distances vs. UDP-glucose
 # TODO: this should be a function in the remn package
