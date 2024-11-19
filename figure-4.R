@@ -90,17 +90,13 @@ gnps_annotations %>%
 
 
 #
-# Figure 4d 6174 spermidine-related compound
+# Figure 4d spermidine-related compounds
 #
 
-example_peak_id <- "6174"
 
-# candidate annotations for this peak
-peak_hmdb_compound %>% filter(peak_id == example_peak_id)
-
-# nearest neighbors by MID distance
+# neighborhood
 top_n <- 10
-top_index <- order(hmec_dm[example_peak_id, ])[1:top_n]
+top_index <- order(hmec_dm["6174", ])[1:top_n]
 
 umap_proj <- umap_projection(
     hmec_dm[top_index, top_index], n_neighbors = 5, random_seed = 759284725)
@@ -110,16 +106,26 @@ plot_umap_interactive(umap_proj, plotly_tooltips$tooltip[top_index])
 # MID plots
 selected_exp <- c("glc", "gln", "arg", "met")
 
+# 6174 C10 compound
 plot_mid_matrix(
     c13correct_cols(
-        get_mid_matrix(hmec_mi_data, example_peak_id, selected_exp)
+        get_mid_matrix(hmec_mi_data, "6174", selected_exp)
     ),
     max_mi_fraction = 0.3
 )
 
+# 6284 C9 compound
+plot_mid_matrix(
+   c13correct_cols(
+      get_mid_matrix(hmec_mi_data, "6284", selected_exp)
+   ),
+   max_mi_fraction = 0.3
+)
+
+
 # write_mid_matrix_image(
-#     "C:/tmp/6174-polyamine.png",
-#     get_mid_matrix(hmec_mi_data, example_peak_id, selected_exp),
+#     "C:/tmp/6335-polyamine.png",
+#     get_mid_matrix(hmec_mi_data, "6335", selected_exp),
 #     max_mi_fraction = 0.3)
 
 
