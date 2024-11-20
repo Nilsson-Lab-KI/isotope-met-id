@@ -5,6 +5,8 @@ source("common.R")
 
 # library(reshape2)
 
+experiments <- readRDS(file.path(mi_data_path, "simulated_mi_data_t75.rds"))$experiments
+n_experiments <- length(experiments)
 
 #
 # Figure 3c
@@ -16,27 +18,36 @@ sim_dm <- readRDS(sim_dm_path(mi_stdev, 1))
 umap_proj <- umap_projection(
    sim_dm, n_neighbors = 15, random_seed = 3731594)
 
-# TODO: provide table of cluster annotations 
+# generate color for pathway annotations
 
-# fig3c_clusters <- read_tsv(file.path(input_data_path, "fig_2_clusters.tsv")) %>%
-#    mutate(peak_id = as.character(peak_id)) %>%
-#    mutate(
-#       color = case_when(
-#          cluster_name %in% c("asn", "glu/gln", "ser lipids", "sugars", "val") ~"#0003FF",
-#          cluster_name %in% c("glutathione", "sulfur amino acids", "trp (indole)") ~"#50F200",
-#          cluster_name %in% c("leu/ile", "purines", "pyrimidines", "thr") ~"#7854A2",
-#          cluster_name %in% c("his", "lysine", "TCA & asp") ~"#DF1B53",
-#          cluster_name %in% c("gln", "ser") ~"#ABBDFF"))
+n_pathways = metabolite_pathway %>% distinct(pathway) %>% nrow()
 
-# fig2e_colors <- hmec_peak_list %>%
-#    left_join(fig2e_clusters, by = 'peak_id') %>%
-#    mutate(color = coalesce(color, "#BFBFBF")) %>%
-#    pull(color)
+metabolite_pathway <- read_metabolite_pathway() %>%
+   inner_join(
+      data.frame(
+         peak_id = umap_proj$peak_id,
+         id = str_sub(umap_proj$peak_id, end = -3)),
+      by = "id") %>%
+   group_by(pathway) %>%
+   mutate(pathway_index = cur_group_id()) %>%
+   ungroup() %>%
+   mutate(color = hsv(pathway_index / n_pathways, 1, 1))
 
-plot_umap(umap_proj)
+fig_3c_colors <- umap_proj %>%
+   select(peak_id) %>%
+   left_join(
+      metabolite_pathway %>% select(peak_id, pathway, color),
+      by = 'peak_id') %>%
+   mutate(color = coalesce(color, "#BFBFBF"))
+
+umap_proj %>%
+   ggplot(aes(x = umap_1, y = umap_2, colour = fig_3c_colors$pathway)) +
+   geom_point(alpha = 0.7, show.legend = TRUE) +
+   theme_classic()
+
+plot_umap(umap_proj, colors = fig_3c_colors) + scale_color
 
 # interactive plot with peak numbers
-#plotly_tooltips <- read_plotly_tooltips()
 plot_umap_interactive(umap_proj, rownames(sim_dm))
 
 
@@ -361,7 +372,7 @@ image(
    col = colorRampPalette(c("red", "white"))(rank_threshold)
 )
 
-   #
+#
 # ED Figure 3b
 #
 
@@ -429,7 +440,7 @@ local({
         x = fraction_derived,
         y = path_lengths,
         col = alpha("black", 0.05)
-    )
+   )
     par(original_par)
 })
 
