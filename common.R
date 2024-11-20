@@ -266,4 +266,15 @@ subset_dm_path <- function(subset_size, rep_nr)
 }
 
 
+# AUPR from an accuracy data.frame with columns 'recall', 'precision'
+# rows are assumed to be sorted by the 'recall' column
+aupr <- function(accuracy)
+{
+   n <- nrow(accuracy)
+   sum(
+      diff(accuracy$recall) * (accuracy$precision[-n] + accuracy$precision[-1]) * 0.5
+   )
+}
+
+
 
