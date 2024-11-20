@@ -55,13 +55,12 @@ plot_umap_interactive(umap_proj, rownames(sim_dm))
 # Figure 3d TCA cycle
 #
 
-# version w/o accoa and co2 looks quite good
-
-tca_met_ids <- c("cit_m", "icit_m", "akg_m", "succoa_m", "succ_m", "fum_m", "mal-L_m", "oaa_m", "accoa_m", "co2_m")
-
 # subset MI data to TCA metabolites and compute specific distance matrix
+tca_met_ids <- c("cit_m", "icit_m", "akg_m", "succoa_m", "succ_m", "fum_m", "mal-L_m", "oaa_m", "accoa_m", "co2_m")
 sim_mi_data <- readRDS(sim_mi_data_path(mi_stdev, 1))
 sim_mi_data_tca <- midata_subset(sim_mi_data, tca_met_ids)
+
+stopifnot(all(sim_mi_data_tca$peak_ids == tca_met_ids))
 
 assign_list[sim_dm_tca, sim_conv_index_tca] <- conv_reduce_all(
    sim_mi_data_tca,
@@ -69,51 +68,22 @@ assign_list[sim_dm_tca, sim_conv_index_tca] <- conv_reduce_all(
    f = midist::euclidean_sum_dist,
    g = which.min
 )
+sim_dm_tca <- replace_na_with_max(sim_dm_tca)
 
-# impute missing values with maximal distance
-sim_dm_tca[which(is.na(sim_dm_tca))] <- max(sim_dm_tca, na.rm = TRUE)
+# exclude accoa and co2 from the UMap (small convolutants)
+tca_met_ids_to_plot <- c("cit_m", "icit_m", "akg_m", "succoa_m", "succ_m", "fum_m", "mal-L_m", "oaa_m")
 
 umap_proj <- umap_projection(
-   sim_dm_tca,
-   n_neighbors = 4, random_seed = 3629136)
+   sim_dm_tca[tca_met_ids_to_plot, tca_met_ids_to_plot],
+   n_neighbors = 5, random_seed = 381691)
 
 plot_umap(umap_proj)
 
-plot_umap_interactive(umap_proj, tca_met_ids)
-
-# explore MIDS
-
-# plot_tca_mid <- function(met_id)
-# {
-#    plot_mid_matrix(
-#       get_mid_matrix(sim_mi_data, met_id, sim_mi_data_tca$experiments),
-#       max_mi_fraction = 0.3, plot_title = met_id
-#    )
-# }
-# 
-# plot_tca_mid("cit_m")
-# plot_tca_mid("icit_m")
-# plot_tca_mid("oaa_m")
-
-#
-# Figure 3e fatty acid synthesis
-#
-
-
-fas_met_ids <- c("acACP_c", "btACP_c", "hexACP_c", "ocACP_c", "dcaACP_c", "ddcaACP_c", "myrsACP_c", "palmACP_c") # "malcoa_c"
-fas_tooltips <- c("C2", "C4", "C6", "C8", "C10", "C12", "C14", "C16")
-
-umap_proj <- umap_projection(
-   sim_dm[fas_met_ids, fas_met_ids],
-   n_neighbors = 6, random_seed = 3629136)
-
-plot_umap(umap_proj)
-
-plot_umap_interactive(umap_proj, fas_tooltips)
+plot_umap_interactive(umap_proj, tca_met_ids_to_plot)
 
 
 #
-# Fig 3f precision-recall curves for various noise levels
+# Fig 3e precision-recall curves for various noise levels
 #
 
 gold_standard <- readRDS(file.path(gold_standard_path, 'gold_standard.rds'))
@@ -161,7 +131,7 @@ mean_accuracy %>%
 
    
 #
-# Figure 3g precision-recall curves for subsets of metabolites
+# Figure 3f precision-recall curves for subsets of metabolites
 #
 
 mi_stdev <- 0.01
@@ -205,7 +175,7 @@ mean_accuracy %>%
 
 
 #
-# Figure 3h Area under PR curve (AUPR) for pairs, individual tracers
+# Figure 3g Area under PR curve (AUPR) for pairs, individual tracers
 #
 
 gold_standard <- readRDS(file.path(gold_standard_path, 'gold_standard.rds'))
@@ -214,18 +184,6 @@ mi_stdev <- 0.01
 n_replicates <- 10
 sim_dm <- readRDS(sim_dm_ind_exp_path(mi_stdev, "glc", 1))
 
-experiments <- readRDS(sim_mi_data_path(mi_stdev, 1))$experiments
-n_experiments <- length(experiments)
-
-# compute AUPR from an accuracy data.frame with columns 'recall', 'precision'
-# rows are assumed to be sorted by the 'recall' column
-aupr <- function(accuracy)
-{
-   n <- nrow(accuracy)
-   sum(
-      diff(accuracy$recall) * (accuracy$precision[-n] + accuracy$precision[-1]) * 0.5
-   )
-}
 
 aupr_rep <- function(experiment, rep_nr)
 {
@@ -328,18 +286,11 @@ metabolite_ranks_long %>%
 # Figure 3j metabolite ranks per experiment
 #
 
-# TEMPORARY: test with Deniz' data
-
-load(
-   file.path("C:/tmp/isotope-met-id-deniz", "data", "reverse-engineering",
-             "Results", "simulation", "Rdata_files", "t_75_low_noise_sample_1_N404.RData"))
-names(matrices) <- c("all", experiments)
-
+gold_standard <- readRDS(file.path(gold_standard_path, 'gold_standard.rds'))
 
 ranks_experiment <- function(experiment)
 {
    sim_dm <- readRDS(sim_dm_ind_exp_path(stdev = 0.01, experiment, rep_nr = 1))
-   #sim_dm <- matrices[[experiment]]$distance_matrix
    sim_dm_ranks <- distance_ranks(sim_dm)
    median_ranks(sim_dm_ranks, gold_standard)
 }
@@ -349,7 +300,10 @@ ranks_experiment <- function(experiment)
 rank_threshold <- 20
 ranks_matrix <- sapply(c(experiments, "all"), ranks_experiment) %>% replace_na_with_max()
 ranks_matrix <- pmin(ranks_matrix, rank_threshold+1)
-#ranks_matrix <- 1 - pmin(ranks_matrix, rank_threshold)/rank_threshold
+
+# remove "undiscoverable" metabolites
+ranks_matrix <- ranks_matrix[
+   apply(ranks_matrix, MARGIN = 1, min) <= rank_threshold, ]
 
 # cluster metabolites
 metabolite_clust <- ranks_matrix[, 1:n_experiments] %>% dist() %>% hclust(method = "ward.D")
@@ -362,15 +316,9 @@ experiment_order <-  c(experiment_clust$order, n_experiments+1)
 
 plot(experiment_clust)
 
-# TODO: export plot_matrix from midist
-ranks_matrix[metabolite_order, rev(experiment_order)] %>% t() %>%
-   midist:::plot_matrix() +
-      theme(axis.ticks = element_blank(), axis.text.x = element_blank())
+ranks_matrix[metabolite_order, rev(experiment_order)] %>%
+   image(col = colorRampPalette(c("red", "white"))(rank_threshold + 1))
 
-image(
-   ranks_matrix[rev(metabolite_order), rev(experiment_order)],
-   col = colorRampPalette(c("red", "white"))(rank_threshold)
-)
 
 #
 # ED Figure 3b
@@ -426,21 +374,58 @@ hist(
 
 
 #
-# ED Figure 3c Comparison with path lengths
-#
-# for computation of path lengths from atom map, see Mathematica code
+# ED Figure 3d Successively adding tracing experiments
 #
 
-path_lengths = readRDS(file.path(gold_standard_path, 'path_lengths.rds'))
+# here we need to compute AUPR of n matrices in step 1,
+# n-1 matrices in step 2, ... 1 matrix in step n, total n*(n+1)/2
 
-local({
-    original_par = par(no.readonly = TRUE)
-    par(pty = "s")
-    plot(
-        x = fraction_derived,
-        y = path_lengths,
-        col = alpha("black", 0.05)
+sim_mi_data <- readRDS(sim_mi_data_path(stdev = 0.01, rep_nr = 1))
+
+next_best_experiment <- function(experiments, prev_experiments)
+{
+   try_experiments <- setdiff(experiments, prev_experiments)
+   print(try_experiments)
+   best_aupr <- 0
+   for(experiment in try_experiments) {
+      new_experiments <- c(prev_experiments, experiment)
+      cat(paste(new_experiments, sep = "+"))
+      assign_list[dm, conv_index] <- conv_reduce_all(
+         sim_mi_data,
+         e = new_experiments,
+         f = ifelse(length(new_experiments) > 1, euclidean_sum_dist, euclidean_dist),
+         g = which.min
+      )
+      new_aupr <- continuous_accuracy(dm, gold_standard) %>% aupr()
+      cat(paste0(" AUPR = ", round(new_aupr, 3), "\n"))
+      if(new_aupr > best_aupr) {
+         best_experiment <- experiment
+         best_aupr <- new_aupr
+      }
+   }
+   return(data.frame(experiment = best_experiment, aupr = best_aupr))
+}
+
+{
+   best_experiments <- data.frame(
+      iteration = integer(),
+      experiment = character(),
+      aupr = numeric()
    )
-    par(original_par)
-})
+   
+   for(i in 1:n_experiments) {
+      best_experiments <- bind_rows(
+         best_experiments,
+         next_best_experiment(
+            experiments = experiments,
+            prev_experiments = best_experiments$experiment) %>% mutate(iteration = i)
+      )
+   }
+}
+
+best_experiments %>%
+   mutate(experiment = factor(experiment, levels = experiment)) %>%
+   ggplot(aes(x = experiment, y = aupr)) + 
+   geom_point() +
+   ylim(0, 0.5) + theme_classic()
 
