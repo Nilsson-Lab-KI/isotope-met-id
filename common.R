@@ -195,7 +195,7 @@ nearest_known_table <- function(neighbors_ids, peak_list)
         inner_join(
             peak_list %>% filter(!is.na(known_met_id)),
             join_by('peak_id')) %>%
-        select(rank, known_met_id, inchi_key, name)
+        select(peak_id, rank, known_met_id, inchi_key, name)
 }
 
 #
