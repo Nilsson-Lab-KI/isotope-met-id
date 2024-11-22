@@ -123,12 +123,6 @@ plot_mid_matrix(
 )
 
 
-# write_mid_matrix_image(
-#     "C:/tmp/6335-polyamine.png",
-#     get_mid_matrix(hmec_mi_data, "6335", selected_exp),
-#     max_mi_fraction = 0.3)
-
-
 #
 # Fig 4e 13c enrichmennt for glutamine co-eluting peaks
 #
@@ -151,5 +145,4 @@ image(
     enrichment_mat,
     col = colorRampPalette(c("white", "blue"))(100)
 )
-
 
