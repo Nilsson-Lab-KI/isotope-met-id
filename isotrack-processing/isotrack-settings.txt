@@ -1,0 +1,25 @@
+*** Isotrack settings ***
+
+The analysis in this paper used Isotrack v.1.7.1, available at https://github.com/Yaroslav-Lyutvinskiy/Isotrack
+
+Isotracks works with the Thermo reader DLL. This must be installed on your computer to perform analyses.
+
+
+** Isotrack settings **
+
+We used the following permissive settings to avoid false negatives. Artefacts are removed in later steps. No de-isotoping was done, since mass isotopomer peaks are later detected by NetID. Peaks were required to be present in all replicates.
+
+Mass Accuracy: 10
+Intensity Threshold: 100000
+Gap Scan Max: 2
+Min RT Peak Width: 0.05
+Max RT Peak Width: 10
+
+Min Intensity: 100000
+S/N Ratio: 1.5
+
+No. C13 to Check: 0
+
+Common in files: 3
+RTError: 0.25
+
