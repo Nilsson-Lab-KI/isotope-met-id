@@ -10,20 +10,49 @@ hmec_mi_data_censored <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.
 
 n_peaks <- length(hmec_mi_data$peak_ids)
 
+plot_mid_barchart_ind_points <- function(mids)
+{
+   mids_df <- mids %>% t() %>% as.data.frame()
+   colnames(mids_df) <- as.character(0:(ncol(mids_df)-1))
+
+   df_long <- mids_df %>%
+      mutate(replicate = 1:3) %>%
+      pivot_longer(cols = -replicate,
+                   names_to = "mi",
+                   values_to = "fraction") %>%
+      mutate(mi = factor(mi, levels = unique(mi)))  # avoid re-ordering labels
+
+   # Calculate means for bars
+   means <- df_long %>%
+      group_by(mi) %>%
+      summarise(mean_fraction = mean(fraction))
+   
+   # Plot
+   ggplot() +
+      geom_col(data = means, aes(x = mi, y = mean_fraction)) +
+      geom_point(
+         data = df_long, aes(x = mi, y = fraction), 
+         position = position_dodge2(width = 0.7),
+         size = 10, color = "black") +
+      theme_classic() +
+      labs(y = "MI fraction")
+}
+
+
 #
 #  Figure 1a
 #
 
 # peak 1917 citrate-H
 {
-    g6p_mids <- get_mids(hmec_mi_data, "1917", "glc")
-    plot_mid_barchart(c13correct_cols(g6p_mids))
+    mids <- get_mids(hmec_mi_data, "1917", "glc")
+    plot_mid_barchart_ind_points(c13correct_cols(mids))
 }
 
 # peak 2064 aconitate-H (candidate)
 {
-    g6p_mids <- get_mids(hmec_mi_data, "2064", "glc")
-    plot_mid_barchart(c13correct_cols(g6p_mids))
+   mids <- get_mids(hmec_mi_data, "2064", "glc")
+   plot_mid_barchart_ind_points(c13correct_cols(mids))
 }
 
 
@@ -33,28 +62,28 @@ n_peaks <- length(hmec_mi_data$peak_ids)
 
 # peak 1501 glucose-6P-H
 {
-    g6p_mids <- get_mids(hmec_mi_data, "1501", "glc")
-    plot_mid_barchart(c13correct_cols(g6p_mids))
+   g6p_mids <- get_mids(hmec_mi_data, "1501", "glc")
+   plot_mid_barchart_ind_points(c13correct_cols(g6p_mids))
 }
 
 # peak 4430 UDP+H
 {
-    udp_mids <- get_mids(hmec_mi_data, "4430", "glc")
-    plot_mid_barchart(c13correct_cols(udp_mids))
+   udp_mids <- get_mids(hmec_mi_data, "4430", "glc")
+   plot_mid_barchart_ind_points(c13correct_cols(udp_mids))
 }
 
 
 # convolution glucose-6P * UDP
 {
-    g6p_udp_mids <- convolute_all(g6p_mids, udp_mids)
-    plot_mid_barchart(c13correct_cols(g6p_udp_mids))
+   g6p_udp_mids <- convolute_all(g6p_mids, udp_mids)
+   plot_mid_barchart_ind_points(c13correct_cols(g6p_udp_mids))
 }
 
 
 # peak 597 UDP-glucose-H
 {
-    udpglc_mids <- get_mids(hmec_mi_data, "597", "glc")
-    plot_mid_barchart(c13correct_cols(udpglc_mids))
+   udpglc_mids <- get_mids(hmec_mi_data, "597", "glc")
+   plot_mid_barchart_ind_points(c13correct_cols(udpglc_mids))
 }
 
 
@@ -161,6 +190,7 @@ udpglc_top_index <- intersect(
     order(udpglc_dist),
     which(udpglc_dist < 0.1)
 )[-1]
+
 length(udpglc_top_index)
 
 plot(
