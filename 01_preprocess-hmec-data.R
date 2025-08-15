@@ -24,7 +24,8 @@ netid_peak_list <- netid_peak_list %>%
     # recover the m/z from neutral mass +/- proton
     mutate(mz = mass + proton_mass*ion_mode) %>%
     # drop unused fields
-    select(peak_id, mass, ion_mode, mz)
+    rename(rt = medRt) %>% 
+    select(peak_id, mass, ion_mode, mz, rt)
 
 # list of 721 peaks passing QC
 qc_peak_list <- read_tsv(file.path(input_data_path, "qc-peaks-with-flags.tsv")) %>%
