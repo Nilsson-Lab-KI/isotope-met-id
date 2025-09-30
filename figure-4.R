@@ -89,6 +89,30 @@ gnps_annotations %>%
     group_by(is_lipid) %>% count()
 
 
+# non-lipid peaks annotated by both MIDs and MS2
+overlap_annotations <- gnps_annotations %>%
+   select(peak_id, skeleton, compound_name) %>% 
+   rename(gnps_skeleton = skeleton, gnps_name = compound_name) %>%
+   inner_join(
+      hmec_peak_list %>%
+         filter((is_lipid == 0) & is.na(known_met_id) & !is.na(inchi_key)) %>%
+         select(peak_id, skeleton, name) %>%
+         rename(mid_skeleton = skeleton, mid_name = name),
+      join_by('peak_id')) %>%
+   mutate(same_skeleton = (gnps_skeleton == mid_skeleton))
+
+overlap_annotations %>% count()
+
+overlap_annotations %>% filter(same_skeleton) %>% count()
+
+# export table for manual review
+write.table(
+   overlap_annotations,
+   "overlap_annotations.tsv",
+   sep = "\t", row.names = FALSE, quote = FALSE
+)
+
+
 #
 # Figure 4d spermidine-related compounds
 #
