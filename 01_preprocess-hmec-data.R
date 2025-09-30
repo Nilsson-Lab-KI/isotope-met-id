@@ -143,6 +143,23 @@ write.table(
 )
 
 
+# sirius formula predictions
+sirius_formulas <- 
+   read_tsv(file.path(input_data_path, "sirius_formula_identifications.tsv")) %>%
+   mutate(peak_id = as.character(peak_id)) %>%
+   mutate(n_carbons = str_extract(molecularFormula, "(?<=C)\\d*"))
+
+sirius_formulas_qc <- hmec_peak_list %>%
+   select(peak_id) %>%
+   left_join(sirius_formulas, by='peak_id')
+
+write.table(
+   sirius_formulas_qc,
+   file.path(preprocessed_data_path, "sirius_formula_identifications_qc.tsv"),
+   sep = "\t", row.names = FALSE, quote = FALSE
+)
+
+
 # create tooltip strings for interactive plots
 
 peak_hmdb_compound <- read_peak_hmdb_compound()
