@@ -127,7 +127,20 @@ fig2e_colors <- hmec_peak_list %>%
 
 plot_umap(umap_proj, colors = fig2e_colors)
 
+# export peak list with highlighted clusters and UMap coordinates, for Suppl Table 1
+hmec_peak_list %>%
+   select(peak_id) %>%
+   inner_join(umap_proj, by = 'peak_id') %>%
+   left_join(
+      fig2e_clusters %>% select(peak_id, cluster_name),
+      by = 'peak_id') %>%
+   write.table(
+      file.path('suppl_table_1_fig2e_columns.tsv'),
+      sep = '\t', row.names = FALSE, quote = FALSE
+   )
+
 # interactive plot with peak numbers
+
 plotly_tooltips <- read_plotly_tooltips()
 plot_umap_interactive(umap_proj, plotly_tooltips$tooltip)
 
