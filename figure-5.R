@@ -9,6 +9,7 @@ hmec_peak_list <- read_hmec_peak_list()
 peak_hmdb_compound <- read_peak_hmdb_compound()
 hmec_mi_data <- readRDS(file.path(mi_data_path, "hmec_mi_data_censored.rds"))
 hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_dm.rds'))
+
 plotly_tooltips <- read_plotly_tooltips()
 
 
@@ -41,20 +42,14 @@ nearest_known_table(neighbors, hmec_peak_list)
 #
 selected_exp <- c("gly", "lys", "met", "ser")
 
+# 5565 TMGL
 plot_mid_matrix(
    c13correct_cols(
       get_mid_matrix(hmec_mi_data, "5665", selected_exp)
    ),
    max_mi_fraction = 0.3
 )
-
-# 6269 trimethyllysine +H (known)
-plot_mid_matrix(
-   c13correct_cols(
-      get_mid_matrix(hmec_mi_data, "6269", selected_exp)
-   ),
-   max_mi_fraction = 0.3
-)
+get_mid_matrix(hmec_mi_data, "5665", selected_exp)
 
 # 2531 glycine (known)
 plot_mid_matrix(
@@ -63,6 +58,16 @@ plot_mid_matrix(
    ),
    max_mi_fraction = 0.3
 )
+get_mid_matrix(hmec_mi_data, "2531", selected_exp)
+
+# 6269 trimethyllysine +H (known)
+plot_mid_matrix(
+   c13correct_cols(
+      get_mid_matrix(hmec_mi_data, "6269", selected_exp)
+   ),
+   max_mi_fraction = 0.3
+)
+get_mid_matrix(hmec_mi_data, "6269", selected_exp)
 
 # convolution MID tmlys * gly
 mids_tmlys_gly_conv <- convolute_all(

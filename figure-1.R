@@ -10,6 +10,7 @@ hmec_mi_data_censored <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.
 
 n_peaks <- length(hmec_mi_data$peak_ids)
 
+
 plot_mid_barchart_ind_points <- function(mids)
 {
    mids_df <- mids %>% t() %>% as.data.frame()
@@ -159,7 +160,6 @@ euclidean_dist(convolute(mid_A, mid_C3), mid_B)
 #
 
 # calculate all distances vs. UDP-glucose
-# TODO: this should be a function in the remn package
 {
     udpglc_index <- get_peak_index(hmec_mi_data_censored, "597")
     udpglc_dist <- rep(0.0, n_peaks)
