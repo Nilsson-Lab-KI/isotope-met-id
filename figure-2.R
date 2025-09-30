@@ -18,7 +18,6 @@ stopifnot(all(hmec_mi_data$peak_ids == hmec_peak_list$peak_id))
 # precomputed distance matrix
 hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_dm.rds'))
 
-
 #
 #  Fig 2b 13C enrichment
 #
@@ -189,5 +188,10 @@ plot_mid_matrix(
 #  Figure 2h MID and MS2 network was generated in cytoscape
 #
 
+# average node degree in the network corresponding to d < 0.7
+sum(hmec_dm[lower.tri(hmec_dm)] < 0.7)
 
+# number of metabolites with at least one connection
+# (discounting the marginal zeros)
+sum(rowSums(hmec_dm < 0.7) - 1 > 0)
 
