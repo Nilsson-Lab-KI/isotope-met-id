@@ -67,6 +67,18 @@ write.table(
     sep = '\t', row.names = FALSE
 )
 
+# export a table of carbon numbers
+hmec_peak_n_carbons <- data.frame(
+   peak_id = hmec_mi_data$peak_ids,
+   n_carbons = hmec_mi_data$peak_n_atoms
+)
+
+write.table(
+   hmec_peak_n_carbons,
+   file.path(preprocessed_data_path, "hmec_peak_n_carbons_qc.tsv"),
+   sep = "\t", row.names = FALSE, quote = FALSE
+)
+
 
 # Censor false MIs
 hmec_mi_data_censored <- censor_false_mi(
