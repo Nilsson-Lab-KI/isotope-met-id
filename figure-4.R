@@ -7,8 +7,8 @@ source("common.R")
 
 hmec_peak_list <- read_hmec_peak_list()
 peak_hmdb_compound <- read_peak_hmdb_compound()
-hmec_mi_data <- readRDS(file.path(mi_data_path, "hmec_mi_data_censored.rds"))
-hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_dm.rds'))
+hmec_mi_data <- readRDS(file.path(mi_data_path, "hmec_mi_data_13c_corr.rds"))
+hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_13c_corr_dm.rds'))
 plotly_tooltips <- read_plotly_tooltips()
 
 
@@ -132,17 +132,13 @@ selected_exp <- c("glc", "gln", "arg", "met")
 
 # 6174 C10 compound
 plot_mid_matrix(
-    c13correct_cols(
-        get_mid_matrix(hmec_mi_data, "6174", selected_exp)
-    ),
+    get_mid_matrix(hmec_mi_data, "6174", selected_exp),
     max_mi_fraction = 0.3
 )
 
 # 6284 C9 compound
 plot_mid_matrix(
-   c13correct_cols(
-      get_mid_matrix(hmec_mi_data, "6284", selected_exp)
-   ),
+   get_mid_matrix(hmec_mi_data, "6284", selected_exp),
    max_mi_fraction = 0.3
 )
 
