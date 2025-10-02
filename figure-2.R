@@ -8,7 +8,11 @@ source("common.R")
 # Read data
 hmec_peak_list <- read_hmec_peak_list()
 
-hmec_mi_data <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.rds'))
+# 13C corrected data for computing 13C enrichment
+hmec_mi_data_uncorrected <- readRDS(file.path(mi_data_path, 'hmec_mi_data_censored.rds'))
+# uncorrected data
+hmec_mi_data <- readRDS(file.path(mi_data_path, 'hmec_mi_data.rds'))
+
 n_peaks <- length(hmec_mi_data$peak_ids)
 n_experiments <- length(hmec_mi_data$experiments)
 
@@ -16,7 +20,7 @@ n_experiments <- length(hmec_mi_data$experiments)
 stopifnot(all(hmec_mi_data$peak_ids == hmec_peak_list$peak_id))
 
 # precomputed distance matrix
-hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_dm.rds'))
+hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_13c_corr_dm.rds'))
 
 #
 #  Fig 2b 13C enrichment
@@ -28,7 +32,7 @@ enrichment_mat <- t(
     sapply(1:n_peaks,
         function(p) {
             apply(
-               get_avg_mid(hmec_mi_data, p, ), 2,
+               get_avg_mid(hmec_mi_data_uncorrected, p, ), 2,
                isotopic_enrichment
             )
         }
@@ -67,7 +71,7 @@ selected_exp <- c("cys", "glc", "gln", "glu", "gly", "ser")
 
 # 5108 glutathione +H
 mids_gthrd <- get_mid_matrix(hmec_mi_data, "5108", selected_exp)
-plot_mid_matrix(c13correct_cols(mids_gthrd), max_mi_fraction = 0.3)
+plot_mid_matrix(mids_gthrd, max_mi_fraction = 0.3)
 
 
 #
@@ -79,19 +83,19 @@ selected_exp <- c("glc", "gly", "ser")
 
 # 6795 hypoxantine
 mids_hxan <- get_mid_matrix(hmec_mi_data, "6795", selected_exp)
-plot_mid_matrix(c13correct_cols(mids_hxan), max_mi_fraction = 0.3)
+plot_mid_matrix(mids_hxan, max_mi_fraction = 0.3)
 
 # 1679 ribose-5P (pentose)
 mids_pentose <- get_mid_matrix(hmec_mi_data, "1679", selected_exp)
-plot_mid_matrix(c13correct_cols(mids_pentose), max_mi_fraction = 0.3)
+plot_mid_matrix(mids_pentose, max_mi_fraction = 0.3)
 
 # 1467 inosine
 mids_ins <- get_mid_matrix(hmec_mi_data, "1467", selected_exp)
-plot_mid_matrix(c13correct_cols(mids_ins), max_mi_fraction = 0.3)
+plot_mid_matrix(mids_ins, max_mi_fraction = 0.3)
 
 # convolution hxan x pentose
 mids_conv <- convolute_all(mids_hxan, mids_pentose)
-plot_mid_matrix(c13correct_cols(mids_conv), max_mi_fraction = 0.3)
+plot_mid_matrix(mids_conv, max_mi_fraction = 0.3)
 
 
 #
@@ -107,7 +111,7 @@ hist(hmec_dm[lower.tri(hmec_dm)], n = 100)
 #
 
 umap_proj <- umap_projection(
-    hmec_dm, n_neighbors = 15, random_seed = 571632932)
+   hmec_dm, n_neighbors = 15, random_seed = 571632932)
 
 fig2e_clusters <- read_tsv(file.path(input_data_path, "fig_2_clusters.tsv")) %>%
     mutate(peak_id = as.character(peak_id)) %>%
@@ -125,6 +129,8 @@ fig2e_colors <- hmec_peak_list %>%
     pull(color)
 
 plot_umap(umap_proj, colors = fig2e_colors)
+
+
 
 # export peak list with highlighted clusters and UMap coordinates, for Suppl Table 1
 hmec_peak_list %>%
@@ -189,7 +195,7 @@ plot_mid_matrix(
 #
 
 # average node degree in the network corresponding to d < 0.7
-sum(hmec_dm[lower.tri(hmec_dm)] < 0.7)
+sum(hmec_dm[lower.tri(hmec_dm)] < 0.7) / nrow(hmec_dm)
 
 # number of metabolites with at least one connection
 # (discounting the marginal zeros)

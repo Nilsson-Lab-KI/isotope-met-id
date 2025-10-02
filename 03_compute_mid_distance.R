@@ -30,3 +30,28 @@ saveRDS(
     file.path(mid_distance_path, 'hmec_conv_index.rds')
 )
 
+
+# same, for 13C-corrected data
+hmec_mi_data_13c_corr <- readRDS(file.path(mi_data_path, 'hmec_mi_data_13c_corr.rds'))
+
+assign_list[hmec_13c_corr_dm, hmec_13c_corr_conv_index] <- conv_reduce_all(
+   hmec_mi_data_13c_corr, 1:(n_experiments - 1),
+   f = midist::euclidean_sum_dist,
+   g = which.min,
+   impute = 1
+)
+
+# impute missing values with maximal distance
+max_13c_corr_distance = max(hmec_13c_corr_dm, na.rm = TRUE)
+hmec_13c_corr_dm[which(is.na(hmec_13c_corr_dm))] <- max_13c_corr_distance
+
+# Write distance matrix
+saveRDS(
+   hmec_13c_corr_dm,
+   file.path(mid_distance_path, 'hmec_13c_corr_dm.rds')
+)
+saveRDS(
+   hmec_13c_corr_conv_index,
+   file.path(mid_distance_path, 'hmec_13c_corr_conv_index.rds')
+)
+

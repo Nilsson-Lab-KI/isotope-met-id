@@ -92,6 +92,19 @@ saveRDS(
     file.path(mi_data_path, 'hmec_mi_data_censored.rds')
 )
 
+
+#
+# Natural 13C correction
+#
+
+hmec_mi_data_13c_corr <- correct_natural_13c(hmec_mi_data_censored)
+
+saveRDS(
+   hmec_mi_data_13c_corr,
+   file.path(mi_data_path, 'hmec_mi_data_13c_corr.rds')
+)
+
+
 #
 # Simulated data
 #
