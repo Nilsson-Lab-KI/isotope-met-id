@@ -6,8 +6,8 @@ source("common.R")
 
 hmec_peak_list <- read_hmec_peak_list()
 peak_hmdb_compound <- read_peak_hmdb_compound()
-hmec_mi_data <- readRDS(file.path(mi_data_path, "hmec_mi_data_censored.rds"))
-hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_dm.rds'))
+hmec_mi_data <- readRDS(file.path(mi_data_path, "hmec_mi_data_13c_corr.rds"))
+hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_13c_corr_dm.rds'))
 plotly_tooltips <- read_plotly_tooltips()
 
 
@@ -34,17 +34,11 @@ lipid_glc_mids <- apply(
 )
 
 plot_mid_matrix(
-    c13correct_cols(lipid_glc_mids[, order(lipid_n_carbons)]),
+    lipid_glc_mids[, order(lipid_n_carbons)],
     max_mi_fraction = 0.3
 )
 
 plot(lipid_n_carbons[order(lipid_n_carbons)], type='l')
-
-# write_mid_matrix_image(
-#     'C:/tmp/lipid_mids.png',
-#     lipid_glc_mids[, order(lipid_n_carbons)],
-#     max_mi_fraction = 0.3
-# )
 
 
 #
@@ -121,7 +115,7 @@ n_neighbors <- 20
 neighbors <- names(sort(hmec_dm[example_peak_id, ])[1:n_neighbors])
 
 umap_proj <- umap_projection(
-    hmec_dm[neighbors, neighbors], n_neighbors = 5, random_seed = 82735681)
+   hmec_dm[neighbors, neighbors], n_neighbors = 5, random_seed = 82735681)
 
 plot_umap(umap_proj)
 
@@ -131,17 +125,15 @@ plot_umap_interactive(umap_proj, plotly_tooltips[neighbors,"tooltip"])
 nearest_known_table(neighbors, hmec_peak_list)
 
 plot_mid_matrix(
-    c13correct_cols(
-        get_mid_matrix(hmec_mi_data, example_peak_id, c("asp", "glc", "gln", "glu"))
-    ),
-    max_mi_fraction = 0.3
+   get_mid_matrix(hmec_mi_data, example_peak_id, c("asp", "glc", "gln", "glu")),
+   max_mi_fraction = 0.3
 )
 
 #
 # ED Figure 4j, 5872 unknown histidine compound
 #
 example_peak_id <- "5872"
-n_neighbors <- 20
+n_neighbors <- 15
 
 # none of the HMDB annotations are related to histidine
 peak_hmdb_compound %>% filter(peak_id == example_peak_id)
@@ -183,16 +175,9 @@ plot_umap_interactive(umap_proj, plotly_tooltips[neighbors,"tooltip"])
 nearest_known_table(neighbors, hmec_peak_list)
 
 plot_mid_matrix(
-    c13correct_cols(
-        get_mid_matrix(hmec_mi_data, example_peak_id, c("ser", "glc"))
-    ),
+    get_mid_matrix(hmec_mi_data, example_peak_id, c("ser", "glc")),
     max_mi_fraction = 0.5
 )
-
-# write_mid_matrix_image(
-#     "C:/tmp/5450-glucosyl-serine-mid.png",
-#     get_mid_matrix(hmec_mi_data, "5450", c("ser", "glc")),
-#     max_mi_fraction = 0.5)
 
 
 #
@@ -217,14 +202,6 @@ plot_umap_interactive(umap_proj, plotly_tooltips[neighbors,"tooltip"])
 nearest_known_table(neighbors, hmec_peak_list)
 
 plot_mid_matrix(
-    c13correct_cols(
-        get_mid_matrix(hmec_mi_data, example_peak_id, c("asn", "glc"))
-    ),
+    get_mid_matrix(hmec_mi_data, example_peak_id, c("asn", "glc")),
     max_mi_fraction = 0.5
 )
-
-# write_mid_matrix_image(
-#     "C:/tmp/6133-lactoyl-asparagine-mid.png",
-#     get_mid_matrix(hmec_mi_data, "6133", c("asn", "glc")),
-#     max_mi_fraction = 0.5)
-
