@@ -7,9 +7,8 @@ source("common.R")
 
 hmec_peak_list <- read_hmec_peak_list()
 peak_hmdb_compound <- read_peak_hmdb_compound()
-hmec_mi_data <- readRDS(file.path(mi_data_path, "hmec_mi_data_censored.rds"))
-hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_dm.rds'))
-
+hmec_mi_data <- readRDS(file.path(mi_data_path, "hmec_mi_data_13c_corr.rds"))
+hmec_dm <- readRDS(file.path(mid_distance_path, 'hmec_13c_corr_dm.rds'))
 plotly_tooltips <- read_plotly_tooltips()
 
 
@@ -18,7 +17,7 @@ plotly_tooltips <- read_plotly_tooltips()
 #
 
 example_peak_id <- "5665"
-n_neighbors <- 30
+n_neighbors <- 60
 
 # candidate annotations for this peak
 peak_hmdb_compound %>% filter(peak_id == example_peak_id)
@@ -27,7 +26,7 @@ peak_hmdb_compound %>% filter(peak_id == example_peak_id)
 neighbors <- names(sort(hmec_dm[example_peak_id, ])[1:n_neighbors])
 
 umap_proj <- umap_projection(
-   hmec_dm[neighbors, neighbors], n_neighbors = 7, random_seed = 35261820)
+   hmec_dm[neighbors, neighbors], n_neighbors = 10, random_seed = 35261820)
 
 plot_umap(umap_proj)
 
@@ -44,30 +43,24 @@ selected_exp <- c("gly", "lys", "met", "ser")
 
 # 5565 TMGL
 plot_mid_matrix(
-   c13correct_cols(
-      get_mid_matrix(hmec_mi_data, "5665", selected_exp)
-   ),
+   get_mid_matrix(hmec_mi_data, "5665", selected_exp),
    max_mi_fraction = 0.3
 )
 get_mid_matrix(hmec_mi_data, "5665", selected_exp)
 
-# 2531 glycine (known)
-plot_mid_matrix(
-   c13correct_cols(
-      get_mid_matrix(hmec_mi_data, "2531", selected_exp)
-   ),
-   max_mi_fraction = 0.3
-)
-get_mid_matrix(hmec_mi_data, "2531", selected_exp)
-
 # 6269 trimethyllysine +H (known)
 plot_mid_matrix(
-   c13correct_cols(
-      get_mid_matrix(hmec_mi_data, "6269", selected_exp)
-   ),
+   get_mid_matrix(hmec_mi_data, "6269", selected_exp),
    max_mi_fraction = 0.3
 )
 get_mid_matrix(hmec_mi_data, "6269", selected_exp)
+
+# 2531 glycine (known)
+plot_mid_matrix(
+   get_mid_matrix(hmec_mi_data, "2531", selected_exp),
+   max_mi_fraction = 0.3
+)
+get_mid_matrix(hmec_mi_data, "2531", selected_exp)
 
 # convolution MID tmlys * gly
 mids_tmlys_gly_conv <- convolute_all(
@@ -75,7 +68,7 @@ mids_tmlys_gly_conv <- convolute_all(
    get_mid_matrix(hmec_mi_data, "2531", selected_exp)
 )
 plot_mid_matrix(
-   c13correct_cols(mids_tmlys_gly_conv),
+   mids_tmlys_gly_conv,
    max_mi_fraction = 0.3
 )
 
