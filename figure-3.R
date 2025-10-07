@@ -8,6 +8,8 @@ source("common.R")
 experiments <- readRDS(file.path(mi_data_path, "simulated_mi_data_t75.rds"))$experiments
 n_experiments <- length(experiments)
 
+metabolite_pathway <- read_metabolite_pathway()
+
 #
 # Figure 3c
 #
@@ -129,7 +131,60 @@ mean_accuracy %>%
       geom_line() +
       theme_classic() + xlim(0, 1) + ylim(0, 1)
 
-   
+#
+# ED Figure 3c Dependency of MID distance vs. 13C enrichment
+# for glc experiment, 1% noise
+#
+
+sim_dm_glc <- readRDS(file.path(sim_mid_distance_path, "stdev_0.01", "rep_1_glc_dm.rds"))
+lower_triangle <- lower.tri(sim_dm_glc)
+
+n_met <- nrow(sim_dm_glc)
+
+# positive and negative pairs
+positive_index <- (gold_standard == 1) & lower_triangle
+sum(positive_index)
+
+negative_index <- (gold_standard == 0) & lower_triangle
+sum(negative_index)
+
+hist(sim_dm_glc[positive_index], n = 50)
+hist(sim_dm_glc[negative_index], n = 50)
+
+
+# compute 13C enrichment from MI data
+sim_mi_data <- readRDS(sim_mi_data_path(mi_stdev, 1))
+
+glc_enrichment <- sapply(
+   1:n_peaks,
+   function(p) isotopic_enrichment(get_avg_mid(sim_mi_data, p, "glc"))
+)
+
+# take the geometric average of enrichment for each pair
+pair_avg_enrichment <- sqrt(outer(glc_enrichment, glc_enrichment))
+
+hist(pair_avg_enrichment[lower_triangle])
+
+# distance vs. enrichment for positive pairs
+plot(
+   pair_avg_enrichment[positive_index],
+   sim_dm_glc[positive_index],
+)
+
+# same, zoomed in on small MID distances
+plot(
+   pair_avg_enrichment[positive_index],
+   pmin(sim_dm_glc[positive_index], 0.2),
+   col = rgb(0, 0, 0, alpha = 0.5)
+)
+
+# distribution of MID distances for comparison
+plot(
+   1:sum(positive_index) / sum(positive_index),
+   pmin(sort(sim_dm_glc[positive_index]), 0.2)
+)
+
+
 #
 # Figure 3f precision-recall curves for subsets of metabolites
 #
@@ -325,7 +380,6 @@ ranks_matrix[metabolite_order, rev(experiment_order)] %>%
 #
 
 fraction_derived <- readRDS(file.path(gold_standard_path, 'fraction_derived.rds'))
-metabolite_pathway <- read_metabolite_pathway()
 
 frac_derived_long <- melt(
     fraction_derived,
@@ -374,7 +428,7 @@ hist(
 
 
 #
-# ED Figure 3d Successively adding tracing experiments
+# ED Figure 3e Successively adding tracing experiments
 #
 
 # here we need to compute AUPR of n matrices in step 1,
