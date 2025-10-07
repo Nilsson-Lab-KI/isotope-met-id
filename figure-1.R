@@ -191,7 +191,8 @@ udpglc_top_index <- intersect(
     which(udpglc_dist < 0.1)
 )[-1]
 
-length(udpglc_top_index)
+# corresponding quantile
+length(udpglc_top_index) / n_peaks
 
 plot(
     udpglc_dist[udpglc_top_index],
