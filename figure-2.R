@@ -61,6 +61,51 @@ image(
     col = colorRampPalette(c("white", "blue"))(100)
 )
 
+#
+# ED Fig 2x relative errors across replicates
+#
+
+matrix_row_sd <- function(mat) apply(mat, 1, sd)
+
+matrix_row_mean <- function(mat) apply(mat, 1, mean)
+
+matrix_rel_err <- function(mat)
+{
+   row_means <- matrix_row_mean(mat)
+   row_sds <- matrix_row_sd(mat)
+   ifelse(row_means > 0, row_sds / row_means, NA)
+}
+
+mean_matrix <- sapply(
+   hmec_mi_data_uncorrected$experiments,
+   function(exp) {
+      sapply(
+         1:n_peaks,
+         function(peak) {
+            matrix_row_mean(get_mids(hmec_mi_data_uncorrected, peak, exp))
+         }
+      ) %>% unlist()
+   }
+)
+
+rel_err_matrix <- sapply(
+   hmec_mi_data_uncorrected$experiments,
+   function(exp) {
+      sapply(
+         1:n_peaks,
+         function(peak) {
+            matrix_rel_err(get_mids(hmec_mi_data_uncorrected, peak, exp))
+         }
+      ) %>% unlist()
+   }
+)
+
+# relative errors for "detectable" MIs (mean fraction > 5%)
+hist(pmin(rel_err_matrix[mean_matrix > 0.05], 0.3), n = 100)
+
+# fraction of MIs with relative error < 5%
+sum(rel_err_matrix[mean_matrix > 0.05] < 0.05, na.rm = TRUE) / sum(mean_matrix > 0.05, na.rm = TRUE)
+
 
 #
 # Fig 2c glutathione
