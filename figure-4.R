@@ -30,6 +30,9 @@ hmec_peak_list %>%
 example_peak_id <- "4889"
 n_neighbors <- 20
 
+# corresponding rank quantile
+n_neighbors / nrow(hmec_dm)
+
 # candidate annotations for this peak
 peak_hmdb_compound %>% filter(peak_id == example_peak_id)
 
@@ -45,6 +48,9 @@ plot_umap_interactive(umap_proj, plotly_tooltips[neighbors,"tooltip"])
 
 # list of known metabolite ids in this neighborhood
 nearest_known_table(neighbors, hmec_peak_list)
+
+
+
 
 
 #
@@ -120,6 +126,10 @@ write.table(
 
 # neighborhood
 top_n <- 10
+
+# corresponding rank quantile
+top_n / nrow(hmec_dm)
+
 top_index <- order(hmec_dm["6174", ])[1:top_n]
 
 umap_proj <- umap_projection(
