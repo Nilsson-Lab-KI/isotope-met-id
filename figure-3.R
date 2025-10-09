@@ -85,6 +85,39 @@ plot_umap_interactive(umap_proj, tca_met_ids_to_plot)
 
 
 #
+# ED Fig 3b Leucine oxidation
+#
+
+leu_met_ids <- c("leu-L_m", "4mop_m", "ivcoa_m", "3mb2coa_m", "3mgcoa_m", "hmgcoa_m", "acac_m", "accoa_m", "co2_m")
+
+sim_mi_data <- readRDS(sim_mi_data_path(mi_stdev, 1))
+sim_mi_data_leu <- midata_subset(sim_mi_data, leu_met_ids)
+
+stopifnot(all(sim_mi_data_leu$peak_ids == leu_met_ids))
+
+assign_list[sim_dm_leu, sim_conv_index_leu] <- conv_reduce_all(
+   sim_mi_data_leu,
+   1:length(sim_mi_data_leu$experiments),
+   f = midist::euclidean_sum_dist,
+   g = which.min
+)
+sim_dm_leu <- replace_na_with_max(sim_dm_leu)
+
+heatmap(sim_dm_leu)
+
+# exclude co2 from UMap
+leu_met_ids_to_plot <- c("leu-L_m", "4mop_m", "ivcoa_m", "3mb2coa_m", "3mgcoa_m", "hmgcoa_m", "acac_m", "accoa_m")
+
+umap_proj <- umap_projection(
+   sim_dm_leu[leu_met_ids_to_plot, leu_met_ids_to_plot],
+   n_neighbors = 3, random_seed = 841741)
+
+plot_umap(umap_proj)
+
+plot_umap_interactive(umap_proj, leu_met_ids_to_plot)
+
+
+#
 # Fig 3e precision-recall curves for various noise levels
 #
 
