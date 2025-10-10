@@ -258,9 +258,9 @@ network_table <- as.data.frame(pair_index) %>%
 network_nodes <- union(network_table$peak_id_1, network_table$peak_id_2)
 network_nodes %>% length
 
-# average node degree in the network (counting metabolite with zero edges)
-sum(hmec_dm[lower.tri(hmec_dm)] < dist_cutoff) / nrow(hmec_dm)
-
+# average node degree in the network
+nrow(network_table) / length(network_nodes)
+    
 # export table for visualization in Cytoscape
 write.table(
    network_table,
