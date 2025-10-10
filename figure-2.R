@@ -236,13 +236,35 @@ plot_mid_matrix(
     max_mi_fraction = 0.3)
 
 #
-#  Figure 2h MID and MS2 network was generated in cytoscape
+# Figure 2h MID-based network
 #
 
-# average node degree in the network corresponding to d < 0.7
-sum(hmec_dm[lower.tri(hmec_dm)] < 0.7) / nrow(hmec_dm)
+dist_cutoff <- 0.3
+pair_index <- which(hmec_dm < 0.3, arr.ind = TRUE)
+
+# table of node pairs
+network_table <- as.data.frame(pair_index) %>%
+   rename(index_1 = row, index_2 = col) %>%
+   mutate(
+      peak_id_1 = hmec_mi_data$peak_ids[index_1],
+      peak_id_2 = hmec_mi_data$peak_ids[index_2],
+      distance = hmec_dm[pair_index],
+      n_carbon_1 = hmec_mi_data$peak_n_atoms[index_1],
+      n_carbon_2 = hmec_mi_data$peak_n_atoms[index_2]
+   ) %>%
+   filter(index_1 < index_2)
 
 # number of metabolites with at least one connection
-# (discounting the marginal zeros)
-sum(rowSums(hmec_dm < 0.7) - 1 > 0)
+network_nodes <- union(network_table$peak_id_1, network_table$peak_id_2)
+network_nodes %>% length
+
+# average node degree in the network (counting metabolite with zero edges)
+sum(hmec_dm[lower.tri(hmec_dm)] < dist_cutoff) / nrow(hmec_dm)
+
+# export table for visualization in Cytoscape
+write.table(
+   network_table,
+   "all-tracers-13c-corr-dist0.3-edges.tsv",
+   col.names = TRUE, row.names = FALSE, sep = "\t", quote = FALSE
+)
 
